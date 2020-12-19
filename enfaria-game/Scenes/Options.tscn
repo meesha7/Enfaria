@@ -1,0 +1,110 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://Scripts/Options.gd" type="Script" id=1]
+
+[node name="MarginContainer" type="MarginContainer"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = -0.793701
+margin_bottom = -0.793701
+custom_constants/margin_right = 250
+custom_constants/margin_top = 100
+custom_constants/margin_left = 250
+custom_constants/margin_bottom = 100
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+margin_left = 250.0
+margin_top = 100.0
+margin_right = 774.0
+margin_bottom = 500.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer"]
+margin_left = 170.0
+margin_top = 128.0
+margin_right = 354.0
+margin_bottom = 272.0
+size_flags_vertical = 3
+script = ExtResource( 1 )
+
+[node name="Resolution" type="HBoxContainer" parent="CenterContainer/VBoxContainer"]
+margin_right = 184.0
+margin_bottom = 20.0
+
+[node name="ResolutionLabel" type="Label" parent="CenterContainer/VBoxContainer/Resolution"]
+margin_top = 3.0
+margin_right = 80.0
+margin_bottom = 17.0
+rect_min_size = Vector2( 80, 0 )
+text = "Resolution"
+
+[node name="ResolutionButton" type="OptionButton" parent="CenterContainer/VBoxContainer/Resolution"]
+margin_left = 84.0
+margin_right = 184.0
+margin_bottom = 20.0
+text = "1920x1080"
+
+[node name="Fullscreen" type="HBoxContainer" parent="CenterContainer/VBoxContainer"]
+margin_top = 24.0
+margin_right = 184.0
+margin_bottom = 48.0
+
+[node name="FullscreenLabel" type="Label" parent="CenterContainer/VBoxContainer/Fullscreen"]
+margin_top = 5.0
+margin_right = 80.0
+margin_bottom = 19.0
+rect_min_size = Vector2( 80, 0 )
+text = "Fullscreen"
+
+[node name="FullscreenBox" type="CheckBox" parent="CenterContainer/VBoxContainer/Fullscreen"]
+margin_left = 84.0
+margin_right = 108.0
+margin_bottom = 24.0
+
+[node name="Borderless" type="HBoxContainer" parent="CenterContainer/VBoxContainer"]
+margin_top = 52.0
+margin_right = 184.0
+margin_bottom = 76.0
+
+[node name="BorderlessLabel" type="Label" parent="CenterContainer/VBoxContainer/Borderless"]
+margin_top = 5.0
+margin_right = 80.0
+margin_bottom = 19.0
+rect_min_size = Vector2( 80, 0 )
+text = "Borderless"
+
+[node name="BorderlessBox" type="CheckBox" parent="CenterContainer/VBoxContainer/Borderless"]
+margin_left = 84.0
+margin_right = 108.0
+margin_bottom = 24.0
+disabled = true
+
+[node name="Spacer" type="HBoxContainer" parent="CenterContainer/VBoxContainer"]
+margin_top = 80.0
+margin_right = 184.0
+margin_bottom = 110.0
+rect_min_size = Vector2( 0, 30 )
+
+[node name="ControlButtons" type="HBoxContainer" parent="CenterContainer/VBoxContainer"]
+margin_top = 114.0
+margin_right = 184.0
+margin_bottom = 144.0
+custom_constants/separation = 30
+alignment = 1
+
+[node name="Back" type="Button" parent="CenterContainer/VBoxContainer/ControlButtons"]
+margin_left = 17.0
+margin_right = 77.0
+margin_bottom = 30.0
+rect_min_size = Vector2( 60, 30 )
+text = "Back"
+
+[node name="Save" type="Button" parent="CenterContainer/VBoxContainer/ControlButtons"]
+margin_left = 107.0
+margin_right = 167.0
+margin_bottom = 30.0
+rect_min_size = Vector2( 60, 30 )
+text = "Save"
+[connection signal="pressed" from="CenterContainer/VBoxContainer/Fullscreen/FullscreenBox" to="CenterContainer/VBoxContainer" method="_on_FullscreenBox_pressed"]
