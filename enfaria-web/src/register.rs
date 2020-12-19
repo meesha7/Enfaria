@@ -25,6 +25,7 @@ pub struct Register {
     email: String,
     username: String,
     password: String,
+    password2: String,
 }
 
 async fn register_fn(register: Register, pool: Arc<MySqlPool>) -> Result<impl Reply, Rejection> {
@@ -37,6 +38,10 @@ async fn register_fn(register: Register, pool: Arc<MySqlPool>) -> Result<impl Re
     );
 
     if row.is_some() {
+        return Err(warp::reject::reject());
+    }
+
+    if register.password != register.password2{
         return Err(warp::reject::reject());
     }
 
