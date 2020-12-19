@@ -1,0 +1,32 @@
+{% extends "base.tera" %}
+{% block title %}Login{% endblock title %}
+{% block body %}
+{% include "navbar.tera" %}
+<div class="columns is-align-items-center is-flex login">
+	<div class="column"></div>
+	<div class="column is-3">
+		<form action="/do_login" method="post">
+		<div class="field">
+			<label class="label">Username</label>
+			<div class="control">
+				<input class="input" type="text" name="username">
+			</div>
+		</div>
+
+		<div class="field">
+			<label class="label">Password</label>
+			<div class="control">
+		    	<input class="input" type="password" name="password">
+			</div>
+		</div>
+
+		<div class="field is-grouped is-grouped-centered">
+			<div class="control">
+				<button class="button is-primary" type="submit">Submit</button>
+			</div>
+		</div>
+		</form>
+	</div>
+	<div class="column"></div>
+</div>
+{% endblock body %}

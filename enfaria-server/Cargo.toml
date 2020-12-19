@@ -1,0 +1,12 @@
+[package]
+name = "farmer-server"
+version = "0.1.0"
+authors = ["Elinvynia <59487684+Elinvynia@users.noreply.github.com>"]
+edition = "2018"
+
+[dependencies]
+farmer-common = { path = "../farmer-common" }
+parking_lot = { version = "0.11", features = ["deadlock_detection"] }
+bincode = "1.3"
+lazy_static = "1.4"
+smol = "1.2"
