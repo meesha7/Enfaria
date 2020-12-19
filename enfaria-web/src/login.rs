@@ -34,7 +34,8 @@ async fn login_fn(login: LoginData, pool: Arc<MySqlPool>, tera: Arc<Tera>) -> Re
             .fetch_one(pool.as_ref())
             .await
     );
-    let db_password: String = warp_unwrap!(query.try_get(1));
+    let db_password: Vec<u8> = warp_unwrap!(query.try_get(1));
+    let db_password: String = warp_unwrap!(std::str::from_utf8(&db_password)).to_string();
     let matches = warp_unwrap!(bcrypt::verify(login.password, &db_password));
     if !matches {
         return Err(warp::reject::not_found());
