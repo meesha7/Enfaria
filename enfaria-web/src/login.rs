@@ -27,6 +27,11 @@ pub struct LoginData {
     password: String,
 }
 
+#[derive(Debug)]
+struct IncorrectPassword;
+impl warp::reject::Reject for IncorrectPassword{}
+
+
 async fn login_fn(login: LoginData, pool: Arc<MySqlPool>, tera: Arc<Tera>) -> Result<impl Reply, Rejection> {
     let query = warp_unwrap!(
         sqlx::query("SELECT id, password FROM users WHERE username = ?")
@@ -38,7 +43,7 @@ async fn login_fn(login: LoginData, pool: Arc<MySqlPool>, tera: Arc<Tera>) -> Re
     let db_password: String = warp_unwrap!(std::str::from_utf8(&db_password)).to_string();
     let matches = warp_unwrap!(bcrypt::verify(login.password, &db_password));
     if !matches {
-        return Err(warp::reject::not_found());
+        return Err(warp::reject::custom(IncorrectPassword));
     };
 
     let id: i64 = warp_unwrap!(query.try_get(0));

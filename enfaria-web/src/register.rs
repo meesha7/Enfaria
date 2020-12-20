@@ -28,6 +28,18 @@ pub struct Register {
     password2: String,
 }
 
+#[derive(Debug)]
+struct IncorrectPassword;
+impl warp::reject::Reject for IncorrectPassword{}
+
+#[derive(Debug)]
+struct ExistingUser;
+impl warp::reject::Reject for ExistingUser{}
+
+#[derive(Debug)]
+struct HashError;
+impl warp::reject::Reject for HashError{}
+
 async fn register_fn(register: Register, pool: Arc<MySqlPool>) -> Result<impl Reply, Rejection> {
     let row = warp_unwrap!(
         sqlx::query("SELECT * FROM users WHERE username = ? OR email = ?")
@@ -38,16 +50,16 @@ async fn register_fn(register: Register, pool: Arc<MySqlPool>) -> Result<impl Re
     );
 
     if row.is_some() {
-        return Err(warp::reject::reject());
+        return Err(warp::reject::custom(ExistingUser));
     }
 
     if register.password != register.password2{
-        return Err(warp::reject::reject());
+        return Err(warp::reject::custom(IncorrectPassword));
     }
 
     let hash = match bcrypt::hash(&register.password, 11) {
         Ok(h) => h,
-        _ => return Err(warp::reject::reject()),
+        _ => return Err(warp::reject::custom(HashError)),
     };
 
     warp_unwrap!(
