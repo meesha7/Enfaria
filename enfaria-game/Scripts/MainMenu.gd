@@ -8,7 +8,7 @@ func _ready():
 	get_node("Quit").connect("pressed", self, "_on_quit_pressed")
 
 func _on_start_pressed():
-	tree.change_scene("Scenes/Join.tscn")
+	tree.change_scene("Scenes/Player.tscn")
 
 func _on_option_pressed():
 	tree.change_scene("Scenes/Options.tscn")
