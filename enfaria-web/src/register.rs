@@ -33,12 +33,44 @@ struct IncorrectPassword;
 impl warp::reject::Reject for IncorrectPassword{}
 
 #[derive(Debug)]
+struct InvalidPassword;
+impl warp::reject::Reject for InvalidPassword{}
+
+#[derive(Debug)]
+struct InvalidEmail;
+impl warp::reject::Reject for InvalidEmail{}
+
+#[derive(Debug)]
+struct InvalidUsername;
+impl warp::reject::Reject for InvalidUsername{}
+
+#[derive(Debug)]
 struct ExistingUser;
 impl warp::reject::Reject for ExistingUser{}
 
 #[derive(Debug)]
 struct HashError;
 impl warp::reject::Reject for HashError{}
+
+fn email_valid(email: &String) -> bool{
+    return email.len() <= 100 && checkmail::validate_email(email);
+}
+
+fn username_valid(username: &String) -> bool{
+    if username.len() < 3 || username.len() > 50{
+        return false;
+    }
+    return username.chars().filter(|&ch| !ch.is_ascii()).count() == 0;
+}
+
+fn password_valid(password: &String) -> bool{
+    if password.len() < 8 || password.len() > 300{
+        return false;
+    }
+    let upper_case = password.chars().filter(|&ch| ch.is_uppercase()).count() > 0;
+    let number = password.chars().filter(|&ch| ch.is_numeric()).count() > 0;
+    return upper_case && number;
+}
 
 async fn register_fn(register: Register, pool: Arc<MySqlPool>) -> Result<impl Reply, Rejection> {
     let row = warp_unwrap!(
@@ -49,8 +81,20 @@ async fn register_fn(register: Register, pool: Arc<MySqlPool>) -> Result<impl Re
             .await
     );
 
+    if !email_valid(&register.email){
+        return Err(warp::reject::custom(InvalidEmail));
+    }
+
+    if !username_valid(&register.username){
+        return Err(warp::reject::custom(InvalidUsername));
+    }
+
     if row.is_some() {
         return Err(warp::reject::custom(ExistingUser));
+    }
+
+    if !password_valid(&register.password){
+        return Err(warp::reject::custom(InvalidPassword));
     }
 
     if register.password != register.password2{
