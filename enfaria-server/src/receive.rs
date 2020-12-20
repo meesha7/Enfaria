@@ -1,28 +1,30 @@
 use crate::prelude::*;
-use farmer_common::{Packet, Command};
+use enfaria_common::{Packet, Command};
 use std::{
     collections::hash_map::Entry,
     sync::Arc,
-    net::{UdpSocket, SocketAddr},
+    net::SocketAddr,
 };
 use parking_lot::RwLock;
-use smol::Async;
+use smol::net::UdpSocket;
 
 
-pub async fn receive_data(server: Arc<RwLock<ServerData>>, server_ip: SocketAddr) {
-    let socket = Async::<UdpSocket>::bind(server_ip).unwrap();
-    loop {
-        let mut buf = [0; 1000];
-        let (amt, ip) = urcontinue!(socket.recv_from(&mut buf).await);
-        if amt == 0 {
-            continue
+pub fn receive_data(server: Arc<RwLock<ServerData>>, socket: UdpSocket) {
+    smol::block_on(async move {
+        loop {
+            let mut buf = [0; 1000];
+            let (amt, ip) = urcontinue!(socket.recv_from(&mut buf).await);
+            if amt == 0 {
+                continue
+            }
+            let packet: Packet = urcontinue!(bincode::deserialize(&buf));
+            println!("received {:?}", packet);
+            match packet.command {
+                Command::Connect => { connect_player(server.clone(), ip); }
+                _ => { queue_packet(server.clone(), ip, packet.clone()); }
+            }
         }
-        let packet: Packet = urcontinue!(bincode::deserialize(&buf));
-        match packet.command {
-            Command::Connect => { connect_player(server.clone(), ip); }
-            _ => { queue_packet(server.clone(), ip, packet.clone()); }
-        }
-    }
+    });
 }
 
 

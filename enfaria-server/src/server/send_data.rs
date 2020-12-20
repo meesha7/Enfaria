@@ -1,15 +1,14 @@
 use crate::prelude::*;
 use std::{
     collections::HashMap,
-    net::{UdpSocket, SocketAddr},
+    net::SocketAddr,
     time::{Instant, Duration},
     thread::sleep,
 };
-use smol::Async;
-use farmer_common::Packet;
+use smol::net::UdpSocket;
+use enfaria_common::Packet;
 
-pub async fn send_data(players: HashMap<SocketAddr, UserId>, send_queue: HashMap<UserId, Vec<Packet>>, server_ip: SocketAddr) {
-    let socket = Async::<UdpSocket>::bind(server_ip).unwrap();
+pub async fn send_data(players: HashMap<SocketAddr, UserId>, send_queue: HashMap<UserId, Vec<Packet>>, socket: UdpSocket) {
     loop {
         let now = Instant::now();
 

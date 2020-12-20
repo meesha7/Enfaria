@@ -1,6 +1,6 @@
 use std::net::SocketAddr;
 use std::collections::HashMap;
-use farmer_common::Packet;
+use enfaria_common::Packet;
 
 #[derive(Debug, Default)]
 pub struct ServerData {

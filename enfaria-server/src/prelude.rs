@@ -11,7 +11,10 @@ macro_rules! urcontinue {
     ($e:expr) => {
         match $e {
             Ok(a) => a,
-            Err(_) => continue,
+            Err(e) => {
+                println!("Unwrap Continue Error: {:?}", e);
+                continue
+            },
         };
     };
 }

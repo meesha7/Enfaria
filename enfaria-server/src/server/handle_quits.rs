@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use farmer_common::Command;
+use enfaria_common::Command;
 
 pub fn handle_quits(server: &mut ServerData) {
     let mut quitters = vec![];
