@@ -19,13 +19,13 @@ __meta__ = {
 margin_left = 250.0
 margin_top = 100.0
 margin_right = 774.0
-margin_bottom = 500.0
+margin_bottom = 620.0
 
 [node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer"]
 margin_left = 170.0
-margin_top = 128.0
+margin_top = 202.0
 margin_right = 354.0
-margin_bottom = 272.0
+margin_bottom = 318.0
 size_flags_vertical = 3
 script = ExtResource( 1 )
 
@@ -44,7 +44,7 @@ text = "Resolution"
 margin_left = 84.0
 margin_right = 184.0
 margin_bottom = 20.0
-text = "1920x1080"
+rect_min_size = Vector2( 100, 0 )
 
 [node name="Fullscreen" type="HBoxContainer" parent="CenterContainer/VBoxContainer"]
 margin_top = 24.0
@@ -63,34 +63,16 @@ margin_left = 84.0
 margin_right = 108.0
 margin_bottom = 24.0
 
-[node name="Borderless" type="HBoxContainer" parent="CenterContainer/VBoxContainer"]
+[node name="Spacer" type="HBoxContainer" parent="CenterContainer/VBoxContainer"]
 margin_top = 52.0
 margin_right = 184.0
-margin_bottom = 76.0
-
-[node name="BorderlessLabel" type="Label" parent="CenterContainer/VBoxContainer/Borderless"]
-margin_top = 5.0
-margin_right = 80.0
-margin_bottom = 19.0
-rect_min_size = Vector2( 80, 0 )
-text = "Borderless"
-
-[node name="BorderlessBox" type="CheckBox" parent="CenterContainer/VBoxContainer/Borderless"]
-margin_left = 84.0
-margin_right = 108.0
-margin_bottom = 24.0
-disabled = true
-
-[node name="Spacer" type="HBoxContainer" parent="CenterContainer/VBoxContainer"]
-margin_top = 80.0
-margin_right = 184.0
-margin_bottom = 110.0
+margin_bottom = 82.0
 rect_min_size = Vector2( 0, 30 )
 
 [node name="ControlButtons" type="HBoxContainer" parent="CenterContainer/VBoxContainer"]
-margin_top = 114.0
+margin_top = 86.0
 margin_right = 184.0
-margin_bottom = 144.0
+margin_bottom = 116.0
 custom_constants/separation = 30
 alignment = 1
 

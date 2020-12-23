@@ -15,9 +15,21 @@ _global_script_class_icons={
 
 [application]
 
-config/name="Farmer-game"
+config/name="Enfaria-game"
 run/main_scene="res://Scenes/MainMenu.tscn"
 config/icon="res://icon.png"
+
+[autoload]
+
+Connection="*res://Scripts/Connection.gd"
+Env="*res://Scripts/Env.gd"
+
+[display]
+
+window/size/height=720
+window/size/resizable=false
+window/stretch/mode="2d"
+window/stretch/aspect="expand"
 
 [rendering]
 

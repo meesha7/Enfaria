@@ -4,11 +4,12 @@ use std::{
     net::SocketAddr,
     time::{Instant, Duration},
     thread::sleep,
+    sync::Arc,
 };
-use smol::net::UdpSocket;
+use async_std::net::UdpSocket;
 use enfaria_common::Packet;
 
-pub async fn send_data(players: HashMap<SocketAddr, UserId>, send_queue: HashMap<UserId, Vec<Packet>>, socket: UdpSocket) {
+pub async fn send_data(players: HashMap<SocketAddr, UserId>, send_queue: HashMap<UserId, Vec<Packet>>, socket: Arc<UdpSocket>) {
     loop {
         let now = Instant::now();
 

@@ -9,4 +9,6 @@ enfaria-common = { path = "../enfaria-common" }
 parking_lot = { version = "0.11", features = ["deadlock_detection"] }
 bincode = "1.3"
 lazy_static = "1.4"
-smol = "1.2"
+sqlx = { version = "0.4.2", features = ["runtime-async-std-native-tls", "mysql"] }
+async-std = "1.8"
+dotenv = "0.15"

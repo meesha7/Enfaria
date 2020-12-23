@@ -9,6 +9,7 @@ pub struct ServerData {
     pub players: HashMap<SocketAddr, UserId>,
     pub send_queue: HashMap<UserId, Vec<Packet>>,
     pub receive_queue: HashMap<UserId, Vec<Packet>>,
+    pub tokens: HashMap<UserId, String>,
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Copy, Clone)]

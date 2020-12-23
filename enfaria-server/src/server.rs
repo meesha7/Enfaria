@@ -6,13 +6,14 @@ use std::{
 };
 use crate::prelude::*;
 use parking_lot::RwLock;
-use smol::net::UdpSocket;
+use async_std::{task, net::UdpSocket};
+use sqlx::mysql::MySqlPool;
 
 pub mod send_data;
 pub mod handle_quits;
 
-pub fn server_loop(server: Arc<RwLock<ServerData>>, socket: UdpSocket) {
-    smol::block_on(async move {
+pub fn server_loop(server: Arc<RwLock<ServerData>>, socket: Arc<UdpSocket>, _pool: Arc<MySqlPool>) {
+    task::block_on(async move {
         loop {
             let now = Instant::now();
 
