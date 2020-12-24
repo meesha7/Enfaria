@@ -7,7 +7,7 @@ reloadable=true
 
 [entry]
 
-Windows.64="res://Scripts/enfaria_common.dll"
+Windows.64="res://src/native/enfaria_common.dll"
 
 [dependencies]
 

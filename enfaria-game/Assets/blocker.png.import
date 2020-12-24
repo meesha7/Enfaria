@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/blocker.png-56c5e5c5242a31456ede19091bd59c4f.stex"
+path="res://.import/blocker.png-12a1ed17ced4aeeb0f6a6536a8862ec6.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/blocker.png"
-dest_files=[ "res://.import/blocker.png-56c5e5c5242a31456ede19091bd59c4f.stex" ]
+source_file="res://assets/blocker.png"
+dest_files=[ "res://.import/blocker.png-12a1ed17ced4aeeb0f6a6536a8862ec6.stex" ]
 
 [params]
 

@@ -29,7 +29,7 @@ func _ready():
 		fullscreen_box.pressed = true
 
 func _on_back_pressed():
-	get_tree().change_scene("Scenes/MainMenu.tscn")
+	get_tree().change_scene("res://src/menu/mainmenu.tscn")
 
 func _on_save_pressed():
 	var resolution_button = get_node("Resolution/ResolutionButton")

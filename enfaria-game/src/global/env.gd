@@ -20,11 +20,13 @@ func parse(filename):
 
 	file.open(filename, File.READ)
 
-	var env = {};
+	var variables = {};
 	var line = "";
 
 	while !file.eof_reached():
 		line = file.get_line();
-		var o = line.split("=");
-		env[o[0]] = o[1].lstrip("\"").rstrip("\"");
-	return env;
+		if line == "":
+			continue
+		var split = line.split("=");
+		variables[split[0]] = split[1].lstrip("\"").rstrip("\"");
+	return variables;

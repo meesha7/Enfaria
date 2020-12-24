@@ -16,13 +16,13 @@ _global_script_class_icons={
 [application]
 
 config/name="Enfaria-game"
-run/main_scene="res://Scenes/MainMenu.tscn"
+run/main_scene="res://src/menu/mainmenu.tscn"
 config/icon="res://icon.png"
 
 [autoload]
 
-Connection="*res://Scripts/Connection.gd"
-Env="*res://Scripts/Env.gd"
+connection="*res://src/global/connection.gd"
+env="*res://src/global/env.gd"
 
 [display]
 
