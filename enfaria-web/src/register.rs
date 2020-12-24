@@ -11,7 +11,7 @@ pub fn routes(
         .map(render);
 
     let do_register = warp::post()
-        .and(warp::path("do_register"))
+        .and(warp::path("register"))
         .and(warp::body::content_length_limit(1024 * 32))
         .and(warp::body::form())
         .and(with_db(pool))
