@@ -27,11 +27,6 @@ pub struct LoginData {
     password: String,
 }
 
-#[derive(Debug)]
-struct IncorrectPassword;
-impl warp::reject::Reject for IncorrectPassword{}
-
-
 async fn login_fn(login: LoginData, pool: Arc<MySqlPool>, tera: Arc<Tera>) -> Result<impl Reply, Rejection> {
     let query = warp_unwrap!(
         sqlx::query("SELECT id, password FROM users WHERE username = ?")

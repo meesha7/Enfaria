@@ -4,11 +4,13 @@ use crate::prelude::*;
 pub mod macros;
 pub use macros::*;
 
+pub mod error;
 pub mod index;
 pub mod login;
 pub mod logout;
 pub mod prelude;
 pub mod register;
+pub mod recover;
 
 #[tokio::main]
 async fn main() {
@@ -33,7 +35,7 @@ async fn main() {
     let logout = logout::routes(tera.clone(), pool.clone());
     let register = register::routes(tera.clone(), pool.clone());
 
-    warp::serve(login.or(logout).or(register).or(statics).or(index))
+    warp::serve(login.or(logout).or(register).or(statics).or(index).recover(recover::recover))
         .run(([0, 0, 0, 0], 8000))
         .await;
 }
@@ -49,6 +51,13 @@ impl Template {
         Template {
             name,
             value: Context::new(),
+        }
+    }
+
+    fn with_context(name: &'static str, context: Context) -> Self {
+        Template {
+            name,
+            value: context,
         }
     }
 }

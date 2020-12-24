@@ -28,30 +28,6 @@ pub struct Register {
     password2: String,
 }
 
-#[derive(Debug)]
-struct IncorrectPassword;
-impl warp::reject::Reject for IncorrectPassword{}
-
-#[derive(Debug)]
-struct InvalidPassword;
-impl warp::reject::Reject for InvalidPassword{}
-
-#[derive(Debug)]
-struct InvalidEmail;
-impl warp::reject::Reject for InvalidEmail{}
-
-#[derive(Debug)]
-struct InvalidUsername;
-impl warp::reject::Reject for InvalidUsername{}
-
-#[derive(Debug)]
-struct ExistingUser;
-impl warp::reject::Reject for ExistingUser{}
-
-#[derive(Debug)]
-struct HashError;
-impl warp::reject::Reject for HashError{}
-
 fn email_valid(email: &String) -> bool{
     return email.len() <= 100 && checkmail::validate_email(email);
 }
