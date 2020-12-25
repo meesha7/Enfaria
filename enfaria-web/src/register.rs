@@ -43,6 +43,7 @@ fn password_valid(password: &String) -> bool{
     if password.len() < 8 || password.len() > 300{
         return false;
     }
+
     let upper_case = password.chars().filter(|&ch| ch.is_uppercase()).count() > 0;
     let number = password.chars().filter(|&ch| ch.is_numeric()).count() > 0;
     return upper_case && number;
