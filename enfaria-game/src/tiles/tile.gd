@@ -3,6 +3,7 @@ tool
 extends Node2D
 class_name Tile
 
+var tile_name = "undefined"
 var sprite_path = ""
 var collision_layer = 0
 

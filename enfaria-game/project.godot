@@ -20,6 +20,11 @@ _global_script_classes=[ {
 "path": "res://src/tiles/grass.gd"
 }, {
 "base": "Node2D",
+"class": "Item",
+"language": "GDScript",
+"path": "res://src/objects/item.gd"
+}, {
+"base": "Node2D",
 "class": "Tile",
 "language": "GDScript",
 "path": "res://src/tiles/tile.gd"
@@ -27,6 +32,7 @@ _global_script_classes=[ {
 _global_script_class_icons={
 "Blocker": "",
 "Grass": "",
+"Item": "",
 "Tile": ""
 }
 
@@ -47,6 +53,15 @@ window/size/height=720
 window/size/resizable=false
 window/stretch/mode="2d"
 window/stretch/aspect="expand"
+
+[layer_names]
+
+2d_render/layer_1="Tiles"
+2d_physics/layer_1="Tiles"
+2d_render/layer_2="Player"
+2d_physics/layer_2="Player"
+2d_render/layer_3="UI"
+2d_physics/layer_3="UI"
 
 [rendering]
 
