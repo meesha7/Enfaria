@@ -8,9 +8,26 @@
 
 config_version=4
 
-_global_script_classes=[  ]
+_global_script_classes=[ {
+"base": "Node2D",
+"class": "Blocker",
+"language": "GDScript",
+"path": "res://src/tiles/blocker.gd"
+}, {
+"base": "Node2D",
+"class": "Grass",
+"language": "GDScript",
+"path": "res://src/tiles/grass.gd"
+}, {
+"base": "Node2D",
+"class": "Tile",
+"language": "GDScript",
+"path": "res://src/tiles/tile.gd"
+} ]
 _global_script_class_icons={
-
+"Blocker": "",
+"Grass": "",
+"Tile": ""
 }
 
 [application]

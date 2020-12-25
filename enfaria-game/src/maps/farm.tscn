@@ -1,0 +1,105 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://src/tiles/blocker.gd" type="Script" id=2]
+[ext_resource path="res://src/tiles/grass.gd" type="Script" id=3]
+
+[node name="Farm" type="Node2D"]
+
+[node name="Blocker7" type="Node2D" parent="."]
+script = ExtResource( 2 )
+
+[node name="Blocker" type="Node2D" parent="."]
+position = Vector2( 0, 128 )
+script = ExtResource( 2 )
+
+[node name="Grass" type="Node2D" parent="."]
+position = Vector2( 64, 32 )
+script = ExtResource( 3 )
+
+[node name="Grass2" type="Node2D" parent="."]
+position = Vector2( 32, 32 )
+script = ExtResource( 3 )
+
+[node name="Blocker3" type="Node2D" parent="."]
+position = Vector2( 64, 0 )
+script = ExtResource( 2 )
+
+[node name="Blocker2" type="Node2D" parent="."]
+position = Vector2( 32, 0 )
+script = ExtResource( 2 )
+
+[node name="Blocker4" type="Node2D" parent="."]
+position = Vector2( 0, 32 )
+script = ExtResource( 2 )
+
+[node name="Blocker5" type="Node2D" parent="."]
+position = Vector2( 0, 64 )
+script = ExtResource( 2 )
+
+[node name="Blocker6" type="Node2D" parent="."]
+position = Vector2( 0, 96 )
+script = ExtResource( 2 )
+
+[node name="Grass3" type="Node2D" parent="."]
+position = Vector2( 32, 64 )
+script = ExtResource( 3 )
+
+[node name="Grass4" type="Node2D" parent="."]
+position = Vector2( 64, 64 )
+script = ExtResource( 3 )
+
+[node name="Grass5" type="Node2D" parent="."]
+position = Vector2( 32, 96 )
+script = ExtResource( 3 )
+
+[node name="Grass6" type="Node2D" parent="."]
+position = Vector2( 64, 96 )
+script = ExtResource( 3 )
+
+[node name="Blocker8" type="Node2D" parent="."]
+position = Vector2( 32, 128 )
+script = ExtResource( 2 )
+
+[node name="Blocker9" type="Node2D" parent="."]
+position = Vector2( 64, 128 )
+script = ExtResource( 2 )
+
+[node name="Blocker10" type="Node2D" parent="."]
+position = Vector2( 96, 128 )
+script = ExtResource( 2 )
+
+[node name="Blocker11" type="Node2D" parent="."]
+position = Vector2( 128, 96 )
+script = ExtResource( 2 )
+
+[node name="Blocker12" type="Node2D" parent="."]
+position = Vector2( 128, 128 )
+script = ExtResource( 2 )
+
+[node name="Blocker13" type="Node2D" parent="."]
+position = Vector2( 128, 64 )
+script = ExtResource( 2 )
+
+[node name="Blocker14" type="Node2D" parent="."]
+position = Vector2( 128, 32 )
+script = ExtResource( 2 )
+
+[node name="Blocker15" type="Node2D" parent="."]
+position = Vector2( 96, 0 )
+script = ExtResource( 2 )
+
+[node name="Blocker16" type="Node2D" parent="."]
+position = Vector2( 128, 0 )
+script = ExtResource( 2 )
+
+[node name="Grass7" type="Node2D" parent="."]
+position = Vector2( 96, 32 )
+script = ExtResource( 3 )
+
+[node name="Grass8" type="Node2D" parent="."]
+position = Vector2( 96, 64 )
+script = ExtResource( 3 )
+
+[node name="Grass9" type="Node2D" parent="."]
+position = Vector2( 96, 96 )
+script = ExtResource( 3 )
