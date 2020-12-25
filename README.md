@@ -1,4 +1,4 @@
-# Farmer
+# Enfaria
 You need a MariaDB/MySql instance running with credentials described at `.env`
 
 
