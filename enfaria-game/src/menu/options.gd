@@ -1,6 +1,6 @@
 extends Control
 
-var path = "res://config.cfg"
+onready var path = get_node("/root/constants").config_path
 var config = ConfigFile.new()
 var fullscreen = false
 
@@ -11,6 +11,7 @@ func _ready():
 	resolution.add_item("1920x1080")
 	
 	get_node("Resolution/ResolutionButton").connect("item_selected", self, "_on_resolution_selected")
+	get_node("Controls/ControlsButton").connect("pressed", self, "_on_controls_pressed")
 	get_node("ControlButtons/Back").connect("pressed", self, "_on_back_pressed")
 	get_node("ControlButtons/Save").connect("pressed", self, "_on_save_pressed")
 	get_node("Fullscreen/FullscreenBox").connect("pressed", self, "_on_fullscreen_pressed")
@@ -27,6 +28,9 @@ func _ready():
 		
 	if fullscreen:
 		fullscreen_box.pressed = true
+		
+func _on_controls_pressed():
+	get_tree().change_scene("res://src/menu/controls.tscn")
 
 func _on_back_pressed():
 	get_tree().change_scene("res://src/menu/mainmenu.tscn")
