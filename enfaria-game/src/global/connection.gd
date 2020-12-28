@@ -9,7 +9,7 @@ var session_id = ""
 var packet_list = []
 var packet_queue = []
 
-onready var packet = preload("res://src/native/enfaria_common.gdns").new()
+onready var packet = preload("res://src/native/enfaria_common.gdns")
 
 func _ready():
 	connection.connect_to_host(server_ip, server_port)
