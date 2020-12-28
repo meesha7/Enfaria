@@ -109,4 +109,3 @@ margin_right = 167.0
 margin_bottom = 30.0
 rect_min_size = Vector2( 60, 30 )
 text = "Save"
-[connection signal="pressed" from="CenterContainer/VBoxContainer/Fullscreen/FullscreenBox" to="CenterContainer/VBoxContainer" method="_on_FullscreenBox_pressed"]

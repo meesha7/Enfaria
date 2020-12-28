@@ -142,4 +142,3 @@ margin_right = 140.0
 margin_bottom = 30.0
 rect_min_size = Vector2( 60, 30 )
 text = "Save"
-[connection signal="toggled" from="CenterContainer/VBoxContainer/Up/UpButton" to="CenterContainer/VBoxContainer" method="_on_UpButton_toggled"]
