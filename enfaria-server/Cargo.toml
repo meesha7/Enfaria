@@ -12,3 +12,5 @@ lazy_static = "1.4"
 sqlx = { version = "0.4.2", features = ["runtime-async-std-native-tls", "mysql"] }
 async-std = "1.8"
 dotenv = "0.15"
+log = "0.4"
+env_logger = "0.8"

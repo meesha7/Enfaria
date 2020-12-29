@@ -1,23 +1,21 @@
 use std::net::SocketAddr;
 use std::collections::HashMap;
-use enfaria_common::Packet;
+use enfaria_common::{
+    {Packet, Position},
+    map::Map,
+};
 
 #[derive(Debug, Default)]
 pub struct ServerData {
     pub beat: u64,
-    pub positions: HashMap<UserId, UserPosition>,
+    pub maps: HashMap<UserId, Map>,
+    pub positions: HashMap<UserId, Position>,
     pub players: HashMap<SocketAddr, UserId>,
     pub send_queue: HashMap<UserId, Vec<Packet>>,
     pub receive_queue: HashMap<UserId, Vec<Packet>>,
     pub tokens: HashMap<UserId, String>,
+    pub usernames: HashMap<UserId, String>
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Copy, Clone)]
 pub struct UserId(pub u64);
-
-#[derive(Debug, Copy, Clone)]
-pub struct UserPosition {
-    pub x: u16,
-    pub y: u16,
-    pub z: u16,
-}

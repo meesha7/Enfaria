@@ -31,6 +31,7 @@ pub const SERVER_IP: &str = "0.0.0.0:8888";
 
 fn main() {
     dotenv::dotenv().ok();
+    env_logger::init();
 
     let server = Arc::new(RwLock::new(ServerData::default()));
     let server_ip: SocketAddr = SERVER_IP.parse().unwrap();
@@ -38,7 +39,7 @@ fn main() {
     let pool = Arc::new(task::block_on( async {
         MySqlPoolOptions::new()
         .max_connections(5)
-        .connect(&env::var("DATABASE").unwrap()).await.unwrap()
+        .connect(&env::var("DATABASE_URL").unwrap()).await.unwrap()
     }));
 
     let server_one = server.clone();

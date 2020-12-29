@@ -1,6 +1,9 @@
-use std::net::SocketAddr;
+use std::{net::SocketAddr, fmt::{Display, Formatter}};
 use serde::{Serialize, Deserialize};
 use gdnative::prelude::*;
+use crate::map::Tile;
+
+pub mod map;
 
 #[derive(Debug, Clone, Serialize, Deserialize, NativeClass)]
 #[inherit(Node)]
@@ -23,8 +26,18 @@ impl Packet {
     }
 
     #[export]
+    fn get_beat(&self, _owner: &Node) -> u64 {
+        self.beat
+    }
+
+    #[export]
     fn set_session_id(&mut self, _owner: &Node, session_id: String) {
         self.session_id = session_id;
+    }
+
+    #[export]
+    fn get_session_id(&self, _owner: &Node) -> String {
+        self.session_id.clone()
     }
 
     #[export]
@@ -33,12 +46,35 @@ impl Packet {
     }
 
     #[export]
+    fn get_destination(&self, _owner: &Node) -> String {
+        self.destination.to_string()
+    }
+
+    #[export]
     fn set_command(&mut self, _owner: &Node, command: String) {
-        self.command = match &command[..] {
+        let mut com = match &command[..] {
             "connect" => Command::Connect,
+            "ping" => Command::Ping,
             "quit" => Command::Quit,
-            _ => unreachable!()
+            _ => Command::Quit
+        };
+        if command.starts_with("move") {
+            let position: Position = command.split(" ").collect::<Vec<&str>>()[1].into();
+            com = Command::Move(position);
         }
+        if command.starts_with("create_tile") {
+            let split: Vec<&str> = command.split(" ").collect();
+            let position: Position = split[1..4].join(" ").into();
+            let tile: Tile = split[4].into();
+            com = Command::CreateTile((position, tile))
+
+        }
+        self.command = com
+    }
+
+    #[export]
+    fn get_command(&self, _owner: &Node) -> String {
+        self.command.to_string()
     }
 
     #[export]
@@ -53,13 +89,62 @@ impl Packet {
     fn to_bytes(&mut self, _owner: &Node) -> Vec<u8> {
         bincode::serialize(self).unwrap()
     }
+
+    #[export]
+    fn from_bytes(&mut self, owner: &Node, bytes: Vec<u8>) {
+        let packet: Packet = bincode::deserialize(&bytes).unwrap();
+        self.set_all(owner, packet.beat, packet.session_id, packet.destination.to_string(), packet.command.to_string())
+    }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum Command {
     Connect,
     Ping,
     Quit,
+    Move(Position),
+    CreateTile((Position, Tile)),
+}
+
+impl Display for Command {
+    fn fmt(&self, fmt: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Command::Connect => write!(fmt, "connect"),
+            Command::Ping => write!(fmt, "ping"),
+            Command::Quit => write!(fmt, "quit"),
+            Command::Move(pos) => write!(fmt, "move {} {} {}", pos.x, pos.y, pos.z),
+            Command::CreateTile((pos, tile)) => write!(fmt, "create_tile {} {} {} {}", pos.x, pos.y, pos.z, tile),
+        }
+    }
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Position {
+    pub x: u64,
+    pub y: u64,
+    pub z: u64,
+}
+
+impl From<String> for Position {
+    fn from(string: String) -> Self {
+        let split: Vec<u64> = string.split(" ").map(|x| x.parse().unwrap()).collect();
+        Position {
+            x: split[0],
+            y: split[1],
+            z: split[2],
+        }
+    }
+}
+
+impl From<&str> for Position {
+    fn from(s: &str) -> Self {
+        let split: Vec<u64> = s.split(" ").map(|x| x.parse().unwrap()).collect();
+        Position {
+            x: split[0],
+            y: split[1],
+            z: split[2],
+        }
+    }
 }
 
 fn init(handle: InitHandle) {

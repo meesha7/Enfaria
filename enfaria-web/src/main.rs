@@ -4,6 +4,7 @@ use crate::prelude::*;
 pub mod macros;
 pub use macros::*;
 
+pub mod api;
 pub mod error;
 pub mod index;
 pub mod login;
@@ -30,12 +31,13 @@ async fn main() {
         .and(warp::fs::dir("./static/"))
         .with(warp::compression::gzip());
 
+    let api = api::routes(tera.clone(), pool.clone());
     let index = index::routes(tera.clone(), pool.clone());
     let login = login::routes(tera.clone(), pool.clone());
     let logout = logout::routes(tera.clone(), pool.clone());
     let register = register::routes(tera.clone(), pool.clone());
 
-    warp::serve(login.or(logout).or(register).or(statics).or(index).recover(recover::recover))
+    warp::serve(api.or(login).or(logout).or(register).or(statics).or(index).recover(recover::recover))
         .run(([0, 0, 0, 0], 8000))
         .await;
 }

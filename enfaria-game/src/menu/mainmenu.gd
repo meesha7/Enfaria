@@ -7,38 +7,44 @@ onready var path = get_node("/root/constants").config_path
 var config = ConfigFile.new()
 
 func _ready():
-	if networking == "true":
-		get_node("Play").connect("pressed", self, "_on_play_pressed")
-	else:
-		get_node("Play").connect("pressed", self, "start")
-	get_node("Options").connect("pressed", self, "_on_option_pressed")
-	get_node("Quit").connect("pressed", self, "_on_quit_pressed")
-	$HTTPRequest.connect("request_completed", self, "_on_request_completed")
-	
 	load_config()
+
+	var _x = get_node("ButtonContainer/Buttons/Play").connect("pressed", self, "_on_play_pressed")
+	var _y = get_node("ButtonContainer/Buttons/Options").connect("pressed", self, "_on_option_pressed")
+	var _z = get_node("ButtonContainer/Buttons/Quit").connect("pressed", self, "_on_quit_pressed")
+	var _a = get_node("ButtonContainer/Buttons/HTTPRequest").connect("request_completed", self, "_on_request_completed")
 
 
 func _on_play_pressed():
-	var username = get_parent().get_parent().get_node("FieldContainer/Fields/Username").text
-	var password = get_parent().get_parent().get_node("FieldContainer/Fields/Password").text
-	var payload = "username" + "=" + username + "&" + "password" + "=" + password
-	$HTTPRequest.request(url + "/api/login", [], true, HTTPClient.METHOD_POST, payload)
+	var username = get_node("FieldContainer/Fields/Username").text
+	var password = get_node("FieldContainer/Fields/Password").text
 	
+	if username == "" or password == "":
+		return
+	
+	var payload = "username" + "=" + username + "&" + "password" + "=" + password
+
+	get_node("FieldContainer/Fields/Error").text = "Connecting..."
+	get_node("ButtonContainer/Buttons/HTTPRequest").timeout = 4
+	get_node("ButtonContainer/Buttons/HTTPRequest").request(url + "/api/login", [], true, HTTPClient.METHOD_POST, payload)
+
+
 func _on_request_completed(_result, response_code, _headers, body):
 	if response_code == 200:
-		get_node("/root/connection").session_id = body
-		start()
+		get_node("/root/connection").session_id = body.get_string_from_utf8().replace("\"", "")
+		get_node("/root/connection").join()
+		tree.change_scene("res://src/game.tscn")
 	else:
 		get_parent().get_parent().get_node("FieldContainer/Fields/Error").text = "Failed to connect."
 
-func start():
-	tree.change_scene("res://src/game.tscn")
 
 func _on_option_pressed():
 	tree.change_scene("res://src/menu/options.tscn")
 
+
 func _on_quit_pressed():
 	tree.quit()
+
 
 func load_config():
 	config.load(path)
@@ -67,4 +73,3 @@ func load_config():
 			var scancode = OS.find_scancode_from_string(value)
 			event.set_scancode(scancode)
 			InputMap.action_add_event(x, event)
-

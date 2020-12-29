@@ -1,22 +1,22 @@
 extends KinematicBody2D
 
-const WALK_SPEED = 200
+const WALK_SPEED = 5
 
-var velocity = Vector2()
-
-func _physics_process(delta):
+func _process(delta):
+	var new_position = Vector2(position.x, position.y)
+	
 	if Input.is_action_pressed("Left"):
-		velocity.x = -WALK_SPEED
+		new_position.x += -WALK_SPEED
 	elif Input.is_action_pressed("Right"):
-		velocity.x =  WALK_SPEED
-	else:
-		velocity.x = 0
+		new_position.x +=  WALK_SPEED
 		
 	if Input.is_action_pressed("Up"):
-		velocity.y = -WALK_SPEED
+		new_position.y += -WALK_SPEED
 	elif Input.is_action_pressed("Down"):
-		velocity.y = WALK_SPEED
-	else:
-		velocity.y = 0
+		new_position.y += WALK_SPEED
 
-	move_and_slide(velocity)
+	if new_position == position:
+		return
+		
+	get_node("/root/connection").generate_packet("move" + " " + new_position.x + " " + new_position.y)
+	
