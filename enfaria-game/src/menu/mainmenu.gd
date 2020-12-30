@@ -65,13 +65,11 @@ func load_config():
 	var fullscreen = false
 	var resolution = "1024x720"
 	
-	if config.has_section_key("Display", "Resolution"):
-		resolution = config.get_value("Display", "Fullscreen")
-	
-	if config.has_section_key("Display", "Fullscreen"):
-		fullscreen = config.get_value("Display", "Fullscreen")
+	resolution = config.get_value("Display", "Resolution", "1024x768")
+	fullscreen = config.get_value("Display", "Fullscreen", false)
 		
 	OS.window_fullscreen = fullscreen
+	
 	if fullscreen:
 		OS.set_window_size(OS.get_screen_size())
 	else:
@@ -81,8 +79,10 @@ func load_config():
 	if config.has_section("Controls"):
 		for x in config.get_section_keys("Controls"):
 			InputMap.action_erase_events(x)
+			
 			var event = InputEventKey.new()
 			var value = config.get_value("Controls", x)
 			var scancode = OS.find_scancode_from_string(value)
+			
 			event.set_scancode(scancode)
 			InputMap.action_add_event(x, event)
