@@ -14,7 +14,8 @@ pub struct ServerData {
     pub send_queue: HashMap<UserId, Vec<Packet>>,
     pub receive_queue: HashMap<UserId, Vec<Packet>>,
     pub tokens: HashMap<UserId, String>,
-    pub usernames: HashMap<UserId, String>
+    pub times: HashMap<UserId, u128>,
+    pub usernames: HashMap<UserId, String>,
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Copy, Clone)]

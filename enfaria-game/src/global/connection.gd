@@ -2,11 +2,12 @@ extends Node
 
 var connection = PacketPeerUDP.new()
 var connected = false
+
 var server_ip = "127.0.0.1"
 var server_port = 8888
-
 var session_id = ""
 
+var last_timestamp = 0
 var send_queue = []
 var receive_queue = []
 
@@ -23,6 +24,11 @@ func generate_packet(data):
 func _process(_delta):
 	if !connected:
 		return
+	
+	var now = OS.get_ticks_msec()
+	if now > last_timestamp + 10000:
+		leave()
+		var _x = get_tree().change_scene("res://src/menu/mainmenu.tscn")
 
 	receive_packets()
 	send_packets()
@@ -37,7 +43,11 @@ func receive_packets():
 		var raw = Array(connection.get_packet())
 		var p = packet.new()
 		p.from_bytes(raw)
-		receive_queue.append(p)
+		last_timestamp = OS.get_ticks_msec()
+		if p.get_command() == "ping":
+			p.queue_free()
+		else:
+			receive_queue.append(p)
 		
 	if len(receive_queue) > 10000:
 		print("Packet overflow!")

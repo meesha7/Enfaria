@@ -23,8 +23,9 @@ pub fn receive_data(server: Arc<RwLock<ServerData>>, socket: Arc<UdpSocket>, poo
             let mut s = server.write();
             info!("Receiving: {:?}", &packet);
             match packet.command {
-                Command::Connect => { connect_player(&mut s, ip, &packet, pool.as_ref()).await; }
-                _ => { receive_packet(&mut s, ip, packet.clone()); }
+                Command::Connect => { connect_player(&mut s, ip, &packet, pool.as_ref()).await; },
+                Command::Ping => { ping_user(&mut s, ip) },
+                _ => { receive_packet(&mut s, ip, packet.clone()); },
             }
         }
     });
@@ -94,4 +95,13 @@ pub fn send_map(server: &mut ServerData, id: UserId, ip: SocketAddr, username: &
         pos_x = 0;
         pos_y += 32;
     }
+}
+
+pub fn ping_user(server: &mut ServerData, ip: SocketAddr) {
+    let id = match server.players.get(&ip) {
+        Some(i) => *i,
+        None => return,
+    };
+
+    server.times.insert(id, get_timestamp());
 }

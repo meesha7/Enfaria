@@ -5,6 +5,7 @@ pub use crate::server::{
     server_loop,
     send_data::send_data,
     handle_quits::handle_quits,
+    ping_players::ping_players,
 };
 pub use crate::receive::receive_data;
 pub use log::info;
@@ -75,4 +76,9 @@ pub fn receive_packet(server: &mut ServerData, ip: SocketAddr, packet: Packet) {
         Entry::Occupied(o) => { o.into_mut().push(packet); },
         Entry::Vacant(v) => { v.insert(vec![packet]); }
     }
+}
+
+
+pub fn get_timestamp() -> u128 {
+    std::time::SystemTime::now().duration_since(std::time::SystemTime::UNIX_EPOCH).unwrap().as_millis()
 }

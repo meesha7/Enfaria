@@ -1,5 +1,14 @@
 extends Control
 
+func _ready():
+	var _a = get_node("Pinger").connect("timeout", self, "_on_timeout")
+	get_node("Pinger").start(5)
+
+
+func _on_timeout():
+	get_node("/root/connection").generate_packet("ping")
+
+
 func _input(event):
 	if !(event is InputEventKey):
 		return

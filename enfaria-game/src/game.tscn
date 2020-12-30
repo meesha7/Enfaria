@@ -20,3 +20,5 @@ visible = false
 [node name="Map" type="Node2D" parent="."]
 
 [node name="Player" type="Node2D" parent="."]
+
+[node name="Pinger" type="Timer" parent="."]

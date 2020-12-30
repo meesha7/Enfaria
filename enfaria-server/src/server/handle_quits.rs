@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use enfaria_common::{Command, map::save_map};
+use enfaria_common::map::save_map;
 
 pub fn handle_quits(server: &mut ServerData) {
     let mut quitters = vec![];
@@ -12,6 +12,13 @@ pub fn handle_quits(server: &mut ServerData) {
                 }
             }
         }
+
+        let now = get_timestamp();
+        for (userid, timestamp) in server.times.iter() {
+            if now > timestamp + 10_000 {
+                quitters.push(userid.clone());
+            }
+        }
     }
 
     for mut quitter in quitters {
@@ -19,12 +26,15 @@ pub fn handle_quits(server: &mut ServerData) {
         let map = server.maps.get(&quitter).unwrap();
         save_map(&format!("data/{}", username), map);
 
-        server.players.retain(|_, v| v != &mut quitter);
+        info!("Player quit: {:?}", &username);
+
         server.send_queue.remove(&quitter);
         server.receive_queue.remove(&quitter);
         server.maps.remove(&quitter);
         server.tokens.remove(&quitter);
         server.usernames.remove(&quitter);
         server.positions.remove(&quitter);
+        server.times.remove(&quitter);
+        server.players.retain(|_, v| v != &mut quitter);
     }
 }

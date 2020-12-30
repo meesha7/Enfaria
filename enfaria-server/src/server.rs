@@ -9,8 +9,9 @@ use parking_lot::RwLock;
 use async_std::{task, net::UdpSocket};
 use sqlx::mysql::MySqlPool;
 
-pub mod send_data;
+pub mod ping_players;
 pub mod handle_quits;
+pub mod send_data;
 
 pub fn server_loop(server: Arc<RwLock<ServerData>>, socket: Arc<UdpSocket>, _pool: Arc<MySqlPool>) {
     task::block_on(async move {
@@ -24,6 +25,10 @@ pub fn server_loop(server: Arc<RwLock<ServerData>>, socket: Arc<UdpSocket>, _poo
                 let mut s = server.write();
 
                 // processing goes here
+
+                if s.beat % 40 == 0 {
+                    ping_players(&mut s);
+                }
                 handle_quits(&mut s);
 
                 players = s.players.clone();
