@@ -92,5 +92,5 @@ async fn register_fn(register: Register, pool: Arc<MySqlPool>) -> Result<impl Re
             .await
     );
 
-    Ok(warp::reply::html(""))
+    Ok(warp::redirect(Uri::from_static("/")))
 }
