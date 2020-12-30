@@ -20,6 +20,7 @@ func _input(event):
 		else:
 			inventory.show()
 
+
 func _process(_delta):
 	var packets = get_node("/root/connection").receive_queue
 	for index in packets.size():
@@ -35,3 +36,9 @@ func _process(_delta):
 					tile = Grass.new()
 			tile.position = Vector2(split[1], split[2])
 			get_node("Map").add_child(tile)
+
+
+func _notification(what):
+	if (what == MainLoop.NOTIFICATION_WM_QUIT_REQUEST):
+		get_node("/root/connection").leave()
+		get_tree().quit()

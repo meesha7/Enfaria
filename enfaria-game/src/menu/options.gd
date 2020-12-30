@@ -10,11 +10,11 @@ func _ready():
 	resolution.add_item("1280x1024")
 	resolution.add_item("1920x1080")
 	
-	get_node("Resolution/ResolutionButton").connect("item_selected", self, "_on_resolution_selected")
-	get_node("Controls/ControlsButton").connect("pressed", self, "_on_controls_pressed")
-	get_node("ControlButtons/Back").connect("pressed", self, "_on_back_pressed")
-	get_node("ControlButtons/Save").connect("pressed", self, "_on_save_pressed")
-	get_node("Fullscreen/FullscreenBox").connect("pressed", self, "_on_fullscreen_pressed")
+	var _a = get_node("Resolution/ResolutionButton").connect("item_selected", self, "_on_resolution_selected")
+	var _b = get_node("Controls/ControlsButton").connect("pressed", self, "_on_controls_pressed")
+	var _c = get_node("ControlButtons/Back").connect("pressed", self, "_on_back_pressed")
+	var _d = get_node("ControlButtons/Save").connect("pressed", self, "_on_save_pressed")
+	var _e = get_node("Fullscreen/FullscreenBox").connect("pressed", self, "_on_fullscreen_pressed")
 	
 	var fullscreen_box = get_node("Fullscreen/FullscreenBox")
 	
@@ -30,10 +30,10 @@ func _ready():
 		fullscreen_box.pressed = true
 		
 func _on_controls_pressed():
-	get_tree().change_scene("res://src/menu/controls.tscn")
+	var _a = get_tree().change_scene("res://src/menu/controls.tscn")
 
 func _on_back_pressed():
-	get_tree().change_scene("res://src/menu/mainmenu.tscn")
+	var _a = get_tree().change_scene("res://src/menu/mainmenu.tscn")
 
 func _on_save_pressed():
 	var resolution_button = get_node("Resolution/ResolutionButton")

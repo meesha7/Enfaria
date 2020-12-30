@@ -64,5 +64,11 @@ func join():
 
 
 func leave():
-	connection.disconnect()
+	var p = packet.new()
+	p.set_destination(server_ip + ":" + str(server_port))
+	p.set_session_id(session_id)
+	p.set_command("quit")
+	connection.put_packet(p.to_bytes())
+	p.queue_free()
+	connection.close()
 	connected = false

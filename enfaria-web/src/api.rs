@@ -1,17 +1,25 @@
 use crate::prelude::*;
+use std::env;
 
 pub fn routes(
     tera: Arc<Tera>,
     pool: Arc<MySqlPool>,
 ) -> impl Filter<Extract = (impl Reply,), Error = Rejection> + Clone {
-    warp::post()
+    let login = warp::post()
     	.and(warp::path("api"))
         .and(warp::path("login"))
         .and(warp::body::content_length_limit(1024 * 32))
         .and(warp::body::form())
         .and(with_db(pool))
         .and(with_tera(tera))
-        .and_then(login_fn)
+        .and_then(login_fn);
+
+    let getserver = warp::get()
+        .and(warp::path("api"))
+        .and(warp::path("getserver"))
+        .and_then(getserver_fn);
+
+    login.or(getserver)
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -45,4 +53,10 @@ async fn login_fn(login: LoginData, pool: Arc<MySqlPool>, _tera: Arc<Tera>) -> R
     let session_id: String = query.get(0);
 
     Ok(warp::reply::json(&session_id))
+}
+
+
+async fn getserver_fn() -> Result<impl Reply, Rejection> {
+    let server = env::var("SERVER").unwrap();
+    Ok(warp::reply::json(&server))
 }
