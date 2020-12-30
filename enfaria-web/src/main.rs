@@ -1,4 +1,6 @@
 use crate::prelude::*;
+use listenfd::ListenFd;
+use warp::hyper::server::Server;
 
 #[macro_use]
 pub mod macros;
@@ -13,6 +15,8 @@ pub mod prelude;
 pub mod recover;
 pub mod register;
 
+/// For autoreload functionality, run the server as:
+///     systemfd --no-pid -s http::8000 -- cargo watch -x 'run'
 #[tokio::main]
 async fn main() {
     dotenv::dotenv().ok();
@@ -37,16 +41,30 @@ async fn main() {
     let logout = logout::routes(tera.clone(), pool.clone());
     let register = register::routes(tera.clone(), pool.clone());
 
-    warp::serve(
-        api.or(login)
-            .or(logout)
-            .or(register)
-            .or(statics)
-            .or(index)
-            .recover(recover::recover),
-    )
-    .run(([0, 0, 0, 0], 8000))
-    .await;
+    let routes = api
+        .or(login)
+        .or(logout)
+        .or(register)
+        .or(statics)
+        .or(index)
+        .recover(recover::recover);
+
+    let svc = warp::service(routes);
+
+    let make_svc = hyper::service::make_service_fn(|_: _| {
+        let svc = svc.clone();
+        async move { Ok::<_, Infallible>(svc) }
+    });
+
+    let mut listenfd = ListenFd::from_env();
+
+    let server = if let Some(l) = listenfd.take_tcp_listener(0).unwrap() {
+        Server::from_tcp(l).unwrap()
+    } else {
+        Server::bind(&([0, 0, 0, 0], 8000).into())
+    };
+
+    server.serve(make_svc).await.unwrap();
 }
 
 #[derive(Clone)]
