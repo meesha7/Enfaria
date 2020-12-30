@@ -10,8 +10,8 @@ pub mod index;
 pub mod login;
 pub mod logout;
 pub mod prelude;
-pub mod register;
 pub mod recover;
+pub mod register;
 
 #[tokio::main]
 async fn main() {
@@ -37,9 +37,16 @@ async fn main() {
     let logout = logout::routes(tera.clone(), pool.clone());
     let register = register::routes(tera.clone(), pool.clone());
 
-    warp::serve(api.or(login).or(logout).or(register).or(statics).or(index).recover(recover::recover))
-        .run(([0, 0, 0, 0], 8000))
-        .await;
+    warp::serve(
+        api.or(login)
+            .or(logout)
+            .or(register)
+            .or(statics)
+            .or(index)
+            .recover(recover::recover),
+    )
+    .run(([0, 0, 0, 0], 8000))
+    .await;
 }
 
 #[derive(Clone)]
@@ -57,10 +64,7 @@ impl Template {
     }
 
     fn with_context(name: &'static str, context: Context) -> Self {
-        Template {
-            name,
-            value: context,
-        }
+        Template { name, value: context }
     }
 }
 

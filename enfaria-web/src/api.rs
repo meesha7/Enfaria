@@ -6,7 +6,7 @@ pub fn routes(
     pool: Arc<MySqlPool>,
 ) -> impl Filter<Extract = (impl Reply,), Error = Rejection> + Clone {
     let login = warp::post()
-    	.and(warp::path("api"))
+        .and(warp::path("api"))
         .and(warp::path("login"))
         .and(warp::body::content_length_limit(1024 * 32))
         .and(warp::body::form())
@@ -54,7 +54,6 @@ async fn login_fn(login: LoginData, pool: Arc<MySqlPool>, _tera: Arc<Tera>) -> R
 
     Ok(warp::reply::json(&session_id))
 }
-
 
 async fn getserver_fn() -> Result<impl Reply, Rejection> {
     let server = env::var("SERVER").unwrap();
