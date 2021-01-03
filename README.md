@@ -2,6 +2,11 @@
 You need a MariaDB/MySql instance running with credentials described at `.env`
 
 
+## Native files
+
+Run `native.sh` or open it and run the command from inside of the file (Windows users mostly).
+
+
 ## DB
 
 Create a user for the local DB:

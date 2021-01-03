@@ -8,7 +8,9 @@ reloadable=true
 [entry]
 
 Windows.64="res://src/native/enfaria_common.dll"
+X11.64="res://src/native/libenfaria_common.so"
 
 [dependencies]
 
 Windows.64=[  ]
+X11.64=[  ]

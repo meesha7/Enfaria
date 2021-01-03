@@ -4,3 +4,8 @@
 */config.cfg
 .DS_Store
 enfaria-server/data/*
+*.dll*
+*.so
+*.dylib
+*.pdb
+*.rlib
