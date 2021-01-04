@@ -22,9 +22,14 @@ pub fn handle_quits(server: &mut ServerData) {
     }
 
     for mut quitter in quitters {
+        match server.tokens.get(&quitter) {
+            Some(_) => {},
+            None => continue,
+        };
+
         let username = server.usernames.get(&quitter).unwrap();
         let map = server.maps.get(&quitter).unwrap();
-        save_map(&format!("data/{}", username), map);
+        save_map(&format!("data/{}/map", username), map);
 
         info!("Player quit: {:?}", &username);
 

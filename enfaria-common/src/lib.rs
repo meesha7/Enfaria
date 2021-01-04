@@ -4,6 +4,8 @@ use gdnative::prelude::*;
 use crate::map::Tile;
 
 pub mod map;
+pub mod player;
+pub mod item;
 
 #[derive(Debug, Clone, Serialize, Deserialize, NativeClass)]
 #[inherit(Node)]
@@ -127,12 +129,7 @@ pub struct Position {
 
 impl From<String> for Position {
     fn from(string: String) -> Self {
-        let split: Vec<u64> = string.split(" ").map(|x| x.parse().unwrap()).collect();
-        Position {
-            x: split[0],
-            y: split[1],
-            z: split[2],
-        }
+        string.into()
     }
 }
 

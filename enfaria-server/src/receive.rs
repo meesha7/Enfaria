@@ -71,8 +71,8 @@ pub async fn connect_player(server: &mut ServerData, ip: SocketAddr, packet: &Pa
 pub fn send_map(server: &mut ServerData, id: UserId, ip: SocketAddr, username: &str, session_id: &str) {
     let map;
 
-    if Path::new(&format!("data/{}", username)).exists() {
-        map = get_map(&format!("data/{}", username));
+    if Path::new(&format!("data/{}/map", username)).exists() {
+        map = get_map(&format!("data/{}/map", username));
         server.maps.insert(id, map.clone());
     } else {
         map = get_map("templates/farm.toml");

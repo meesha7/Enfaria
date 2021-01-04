@@ -9,3 +9,4 @@ enfaria-server/data/*
 *.dylib
 *.pdb
 *.rlib
+enfaria-test/*
