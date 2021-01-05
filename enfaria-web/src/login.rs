@@ -6,7 +6,7 @@ pub fn routes(
 ) -> impl Filter<Extract = (impl Reply,), Error = Rejection> + Clone {
     let login = warp::get()
         .and(warp::path("login"))
-        .and(with_tera(tera.clone()))
+        .and(with_tera(tera))
         .and(with_template(Template::new("login.tera")))
         .map(render);
 
@@ -15,7 +15,6 @@ pub fn routes(
         .and(warp::body::content_length_limit(1024 * 32))
         .and(warp::body::form())
         .and(with_db(pool))
-        .and(with_tera(tera))
         .and_then(login_fn);
 
     login.or(do_login)
@@ -27,7 +26,7 @@ pub struct LoginData {
     password: String,
 }
 
-async fn login_fn(login: LoginData, pool: Arc<MySqlPool>, tera: Arc<Tera>) -> Result<impl Reply, Rejection> {
+async fn login_fn(login: LoginData, pool: Arc<MySqlPool>) -> Result<impl Reply, Rejection> {
     let query = warp_unwrap!(
         sqlx::query("SELECT id, password FROM users WHERE username = ?")
             .bind(login.username)
@@ -70,10 +69,8 @@ async fn login_fn(login: LoginData, pool: Arc<MySqlPool>, tera: Arc<Tera>) -> Re
         .domain(domain)
         .finish();
 
-    let mut template = Template::new("index.tera");
-    template.value.insert("logged_in", &true);
     Ok(warp::reply::with_header(
-        render(tera, template),
+        warp::redirect(Uri::from_static("/")),
         "Set-Cookie",
         cookie.to_string(),
     ))
