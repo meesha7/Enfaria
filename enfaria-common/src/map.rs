@@ -1,8 +1,8 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
-    fmt::{Formatter, Display},
-    fs::{self, read_to_string}
+    fmt::{Display, Formatter},
+    fs::{self, read_to_string},
 };
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
