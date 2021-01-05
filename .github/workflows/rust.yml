@@ -1,0 +1,42 @@
+name: Rust
+on:
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        type: [stable, nightly, windows, macos]
+        include:
+          - type: stable
+            rust: stable
+            os: ubuntu-latest
+          - type: nightly
+            rust: nightly
+            os: ubuntu-latest
+          - type: windows
+            rust: stable
+            os: windows-latest
+          - type: macos
+            rust: stable
+            os: macos-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v2
+    - run: rustup default ${{ matrix.rust }}
+    - run: cargo build
+    - run: cargo test
+
+  clippy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - run: cargo clippy
+
+  format:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - run: cargo fmt -- --check
