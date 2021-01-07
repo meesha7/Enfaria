@@ -8,7 +8,7 @@ pub fn handle_quits(server: &mut ServerData) {
         for (userid, packets) in server.receive_queue.iter() {
             for packet in packets {
                 if packet.command == Command::Quit {
-                    quitters.push(userid.clone());
+                    quitters.push(*userid);
                 }
             }
         }
@@ -16,14 +16,14 @@ pub fn handle_quits(server: &mut ServerData) {
         let now = get_timestamp();
         for (userid, timestamp) in server.times.iter() {
             if now > timestamp + 10_000 {
-                quitters.push(userid.clone());
+                quitters.push(*userid);
             }
         }
     }
 
-    for mut quitter in quitters {
+    for quitter in quitters.into_iter() {
         match server.tokens.get(&quitter) {
-            Some(_) => {},
+            Some(_) => {}
             None => continue,
         };
 
@@ -40,6 +40,6 @@ pub fn handle_quits(server: &mut ServerData) {
         server.usernames.remove(&quitter);
         server.positions.remove(&quitter);
         server.times.remove(&quitter);
-        server.players.retain(|_, v| v != &mut quitter);
+        server.players.retain(|_, v| *v != quitter);
     }
 }

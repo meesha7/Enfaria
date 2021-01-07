@@ -11,10 +11,7 @@ pub fn routes(
         .and_then(logout_fn)
 }
 
-async fn logout_fn(
-    cookie: String,
-    pool: Arc<MySqlPool>,
-) -> Result<impl Reply, Rejection> {
+async fn logout_fn(cookie: String, pool: Arc<MySqlPool>) -> Result<impl Reply, Rejection> {
     warp_unwrap!(
         sqlx::query("DELETE FROM sessions WHERE secret = ?")
             .bind(&cookie)
@@ -30,8 +27,8 @@ async fn logout_fn(
         .finish();
 
     Ok(warp::reply::with_header(
-         warp::redirect(Uri::from_static("/")),
-         "Set-Cookie",
-         remove_cookie.to_string(),
+        warp::redirect(Uri::from_static("/")),
+        "Set-Cookie",
+        remove_cookie.to_string(),
     ))
 }

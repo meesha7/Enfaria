@@ -28,25 +28,27 @@ pub struct Register {
     password2: String,
 }
 
-fn email_valid(email: &String) -> bool {
-    return email.len() <= 100 && checkmail::validate_email(email);
+fn email_valid(email: &str) -> bool {
+    email.len() <= 100 && checkmail::validate_email(&email.to_string())
 }
 
-fn username_valid(username: &String) -> bool {
+fn username_valid(username: &str) -> bool {
     if username.len() < 3 || username.len() > 50 {
         return false;
     }
-    return username.chars().filter(|&ch| !ch.is_ascii()).count() == 0;
+
+    username.chars().filter(|&ch| !ch.is_ascii()).count() == 0
 }
 
-fn password_valid(password: &String) -> bool {
+fn password_valid(password: &str) -> bool {
     if password.len() < 8 || password.len() > 300 {
         return false;
     }
 
     let upper_case = password.chars().filter(|&ch| ch.is_uppercase()).count() > 0;
     let number = password.chars().filter(|&ch| ch.is_numeric()).count() > 0;
-    return upper_case && number;
+
+    upper_case && number
 }
 
 async fn register_fn(register: Register, pool: Arc<MySqlPool>) -> Result<impl Reply, Rejection> {

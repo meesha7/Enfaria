@@ -1,22 +1,19 @@
+use async_std::{net::UdpSocket, task};
+use parking_lot::RwLock;
+use sqlx::mysql::MySqlPoolOptions;
 use std::{
     env,
-    sync::Arc,
     net::SocketAddr,
-    thread::{spawn, park},
+    sync::Arc,
+    thread::{park, spawn},
 };
-use parking_lot::RwLock;
-use async_std::{task, net::UdpSocket};
-use sqlx::mysql::MySqlPoolOptions;
 
 #[macro_use]
 extern crate lazy_static;
 
 lazy_static! {
-    pub static ref PLAYER_ID: RwLock<u64> = {
-        RwLock::new(0)
-    };
+    pub static ref PLAYER_ID: RwLock<u64> = RwLock::new(0);
 }
-
 
 #[macro_use]
 mod prelude;
@@ -35,22 +32,21 @@ fn main() {
 
     let server = Arc::new(RwLock::new(ServerData::default()));
     let server_ip: SocketAddr = SERVER_IP.parse().unwrap();
-    let socket = Arc::new(task::block_on(async {UdpSocket::bind(server_ip).await.unwrap()}));
-    let pool = Arc::new(task::block_on( async {
+    let socket = Arc::new(task::block_on(async { UdpSocket::bind(server_ip).await.unwrap() }));
+    let pool = Arc::new(task::block_on(async {
         MySqlPoolOptions::new()
-        .max_connections(5)
-        .connect(&env::var("DATABASE_URL").unwrap()).await.unwrap()
+            .max_connections(5)
+            .connect(&env::var("DATABASE_URL").unwrap())
+            .await
+            .unwrap()
     }));
 
-    let server_one = server.clone();
-    let socket_one = socket.clone();
-    let pool_one = pool.clone();
-    spawn(move || server_loop(server_one, socket_one, pool_one));
+    let server_c = server.clone();
+    let socket_c = socket.clone();
+    let pool_c = pool.clone();
+    spawn(move || server_loop(server_c, socket_c, pool_c));
 
-    let server_two = server.clone();
-    let socket_two = socket.clone();
-    let pool_two = pool.clone();
-    spawn(move || receive_data(server_two, socket_two, pool_two));
+    spawn(move || receive_data(server, socket, pool));
 
     park()
 }

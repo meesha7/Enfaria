@@ -1,16 +1,16 @@
+use crate::prelude::*;
+use async_std::{net::UdpSocket, task};
+use parking_lot::RwLock;
+use sqlx::mysql::MySqlPool;
 use std::{
     collections::HashMap,
     sync::Arc,
     thread::sleep,
-    time::{Instant, Duration},
+    time::{Duration, Instant},
 };
-use crate::prelude::*;
-use parking_lot::RwLock;
-use async_std::{task, net::UdpSocket};
-use sqlx::mysql::MySqlPool;
 
-pub mod ping_players;
 pub mod handle_quits;
+pub mod ping_players;
 pub mod send_data;
 
 pub fn server_loop(server: Arc<RwLock<ServerData>>, socket: Arc<UdpSocket>, _pool: Arc<MySqlPool>) {

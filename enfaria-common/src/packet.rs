@@ -61,11 +61,11 @@ impl Packet {
             _ => Command::Quit,
         };
         if command.starts_with("move") {
-            let position: Position = command.split(" ").collect::<Vec<&str>>()[1].into();
+            let position: Position = command.split(' ').collect::<Vec<&str>>()[1].into();
             com = Command::Move(position);
         }
         if command.starts_with("create_tile") {
-            let split: Vec<&str> = command.split(" ").collect();
+            let split: Vec<&str> = command.split(' ').collect();
             let position: Position = split[1..4].join(" ").into();
             let tile: Tile = split[4].into();
             com = Command::CreateTile((position, tile))
@@ -86,6 +86,7 @@ impl Packet {
         self.set_command(owner, command);
     }
 
+    #[allow(clippy::wrong_self_convention)]
     #[export]
     fn to_bytes(&mut self, _owner: &Node) -> Vec<u8> {
         bincode::serialize(self).unwrap()

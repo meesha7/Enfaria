@@ -24,19 +24,37 @@ jobs:
             os: macos-latest
     runs-on: ${{ matrix.os }}
     steps:
+    - run: echo "C:\msys64\mingw64\bin" >> $GITHUB_PATH
+      shell: bash
     - uses: actions/checkout@v2
     - run: rustup default ${{ matrix.rust }}
-    - run: cargo build
-    - run: cargo test
+    - uses: Swatinem/rust-cache@v1
+      with:
+        working-directory: enfaria-server
+    - run: cargo build --manifest-path=enfaria-server/Cargo.toml
+    - run: cargo test --manifest-path=enfaria-server/Cargo.toml
+    - uses: Swatinem/rust-cache@v1
+      with:
+        working-directory: enfaria-web
+    - run: cargo build --manifest-path=enfaria-web/Cargo.toml
+    - run: cargo test --manifest-path=enfaria-web/Cargo.toml
 
   clippy:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - run: cargo clippy
+    - uses: Swatinem/rust-cache@v1
+      with:
+        working-directory: enfaria-server
+    - run: cargo clippy --manifest-path=enfaria-server/Cargo.toml
+    - uses: Swatinem/rust-cache@v1
+      with:
+        working-directory: enfaria-web
+    - run: cargo clippy --manifest-path=enfaria-web/Cargo.toml
 
   format:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - run: cargo fmt -- --check
+    - run: cargo fmt --manifest-path=enfaria-server/Cargo.toml -- --check
+    - run: cargo fmt --manifest-path=enfaria-web/Cargo.toml -- --check

@@ -1,9 +1,9 @@
-use std::net::SocketAddr;
-use std::collections::HashMap;
 use enfaria_common::{
-    {Packet, Position},
     map::Map,
+    {Packet, Position},
 };
+use std::collections::HashMap;
+use std::net::SocketAddr;
 
 #[derive(Debug, Default)]
 pub struct ServerData {
