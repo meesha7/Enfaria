@@ -1,0 +1,16 @@
+{
+	"width":10,
+	"height":10,
+	"tiles":[
+		[{"name":"Blocker"}, {"name":"Blocker"}, {"name":"Blocker"}, {"name":"Blocker"}, {"name":"Blocker"}, {"name":"Blocker"}, {"name":"Blocker"}, {"name":"Blocker"}, {"name":"Blocker"}, {"name":"Blocker"}],
+		[{"name":"Blocker"}, {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Blocker"}],
+		[{"name":"Blocker"}, {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Blocker"}],
+		[{"name":"Blocker"}, {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Blocker"}],
+		[{"name":"Blocker"}, {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Blocker"}],
+		[{"name":"Blocker"}, {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Blocker"}],
+		[{"name":"Blocker"}, {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Blocker"}],
+		[{"name":"Blocker"}, {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Blocker"}],
+		[{"name":"Blocker"}, {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Grass"},   {"name":"Blocker"}],
+		[{"name":"Blocker"}, {"name":"Blocker"}, {"name":"Blocker"}, {"name":"Blocker"}, {"name":"Blocker"}, {"name":"Blocker"}, {"name":"Blocker"}, {"name":"Blocker"}, {"name":"Blocker"}, {"name":"Blocker"}]
+	]
+}

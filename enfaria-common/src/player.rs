@@ -11,9 +11,9 @@ pub struct Player {
 
 pub fn get_player(path: &str) -> Player {
     let s = read_to_string(path).unwrap();
-    toml::from_str(&s).unwrap()
+    serde_json::from_str(&s).unwrap()
 }
 
 pub fn save_player(path: &str, player: &Player) {
-    fs::write(path, toml::to_string(player).unwrap()).unwrap();
+    fs::write(path, serde_json::to_string_pretty(player).unwrap()).unwrap();
 }

@@ -18,9 +18,34 @@ impl Display for Command {
             Command::Ping => write!(fmt, "ping"),
             Command::Quit => write!(fmt, "quit"),
             Command::Move(pos) => write!(fmt, "move {} {} {}", pos.x, pos.y, pos.z),
-            Command::CreateTile((pos, tile)) => {
-                write!(fmt, "create_tile {} {} {} {}", pos.x, pos.y, pos.z, tile)
+            Command::CreateTile((pos, tile)) => write!(fmt, "create_tile {} {} {} {}", pos.x, pos.y, pos.z, tile),
+        }
+    }
+}
+
+impl From<String> for Command {
+    fn from(s: String) -> Self {
+        match s {
+            x if x.starts_with("connect") => Command::Connect,
+            x if x.starts_with("ping") => Command::Ping,
+            x if x.starts_with("quit") => Command::Quit,
+            x if x.starts_with("move") => {
+                let split: Vec<&str> = x.split(' ').collect();
+                let x = split.get(1).unwrap().parse().unwrap();
+                let y = split.get(2).unwrap().parse().unwrap();
+                let z = split.get(3).unwrap().parse().unwrap();
+                Command::Move(Position { x, y, z })
             }
+            x if x.starts_with("create_tile") => {
+                let split: Vec<&str> = x.split(' ').collect();
+                let x = split.get(1).unwrap().parse().unwrap();
+                let y = split.get(2).unwrap().parse().unwrap();
+                let z = split.get(3).unwrap().parse().unwrap();
+                let position = Position { x, y, z };
+                let tile = (*split.get(4).unwrap()).into();
+                Command::CreateTile((position, tile))
+            }
+            _ => unreachable!(),
         }
     }
 }

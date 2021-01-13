@@ -27,6 +27,7 @@ func _process(_delta):
     
     var now = OS.get_ticks_msec()
     if now > last_timestamp + 10000:
+        print("Timed out, leaving.")
         leave()
         var _x = get_tree().change_scene("res://src/menu/mainmenu.tscn")
 
@@ -44,9 +45,7 @@ func receive_packets():
         var p = packet.new()
         p.from_bytes(raw)
         last_timestamp = OS.get_ticks_msec()
-        if p.get_command() == "ping":
-            p.queue_free()
-        else:
+        if p.get_command() != "ping":
             receive_queue.append(p)
         
     if len(receive_queue) > 10000:
@@ -57,19 +56,18 @@ func receive_packets():
 func send_packets():
     for p in send_queue:
         connection.put_packet(p.to_bytes())
-        p.queue_free()
         
     send_queue.clear()
 
 
 func join():
     connection.connect_to_host(server_ip, server_port)
+    last_timestamp = OS.get_ticks_msec()
     var p = packet.new()
     p.set_destination(server_ip + ":" + str(server_port))
     p.set_session_id(session_id)
     p.set_command("connect")
     connection.put_packet(p.to_bytes())
-    p.queue_free()
     connected = true
 
 
@@ -79,6 +77,5 @@ func leave():
     p.set_session_id(session_id)
     p.set_command("quit")
     connection.put_packet(p.to_bytes())
-    p.queue_free()
     connection.close()
     connected = false

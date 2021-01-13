@@ -5,41 +5,43 @@ pub fn handle_quits(server: &mut ServerData) {
     let mut quitters = vec![];
 
     {
-        for (userid, packets) in server.receive_queue.iter() {
-            for packet in packets {
+        for user in server.users.iter() {
+            let mut removed = false;
+            for packet in user.receive_queue.iter() {
                 if packet.command == Command::Quit {
-                    quitters.push(*userid);
+                    quitters.push(user.id);
+                    removed = true;
+                    break;
                 }
             }
-        }
-
-        let now = get_timestamp();
-        for (userid, timestamp) in server.times.iter() {
-            if now > timestamp + 10_000 {
-                quitters.push(*userid);
+            if removed {
+                continue;
+            }
+            let now = get_timestamp();
+            if now > user.time + 10_000 {
+                quitters.push(user.id);
             }
         }
     }
 
-    for quitter in quitters.into_iter() {
-        match server.tokens.get(&quitter) {
-            Some(_) => {}
-            None => continue,
+    for quitter in quitters.iter() {
+        let user = match server.user_by_id(*quitter) {
+            Some(u) => u,
+            None => {
+                info!("Tried to remove non-existent player {:?}", quitter);
+                continue;
+            }
         };
-
-        let username = server.usernames.get(&quitter).unwrap();
-        let map = server.maps.get(&quitter).unwrap();
-        save_map(&format!("data/{}/map", username), map);
-
-        info!("Player quit: {:?}", &username);
-
-        server.send_queue.remove(&quitter);
-        server.receive_queue.remove(&quitter);
-        server.maps.remove(&quitter);
-        server.tokens.remove(&quitter);
-        server.usernames.remove(&quitter);
-        server.positions.remove(&quitter);
-        server.times.remove(&quitter);
-        server.players.retain(|_, v| *v != quitter);
+        match std::fs::create_dir_all(&format!("data/{}", &user.username)) {
+            Ok(_) => {}
+            Err(e) => {
+                info!("Failed to create save directory: {:?}", e);
+                continue;
+            }
+        };
+        save_map(&format!("data/{}/map", user.username), &user.map);
+        info!("Player quit: {:?}", &user.username);
     }
+
+    server.users.retain(|u| !quitters.contains(&u.id))
 }

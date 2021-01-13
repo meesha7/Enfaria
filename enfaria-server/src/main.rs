@@ -44,9 +44,9 @@ fn main() {
     let server_c = server.clone();
     let socket_c = socket.clone();
     let pool_c = pool.clone();
-    spawn(move || server_loop(server_c, socket_c, pool_c));
+    spawn(move || server::server_loop(server_c, socket_c, pool_c));
 
-    spawn(move || receive_data(server, socket, pool));
+    spawn(move || receive::receive_data(server, socket, pool));
 
     park()
 }

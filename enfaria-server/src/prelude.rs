@@ -1,9 +1,8 @@
-pub use crate::data::{ServerData, UserId};
-pub use crate::receive::receive_data;
-pub use crate::server::{handle_quits::handle_quits, ping_players::ping_players, send_data::send_data, server_loop};
+pub use crate::data::{ServerData, User, UserId};
 pub use crate::{PLAYER_ID, TICKRATE};
-pub use enfaria_common::{Command, Packet, Position};
+pub use enfaria_common::*;
 pub use log::info;
+pub use std::net::SocketAddr;
 
 macro_rules! urcontinue {
     ($e:expr) => {
@@ -17,65 +16,38 @@ macro_rules! urcontinue {
     };
 }
 
-use std::collections::hash_map::Entry;
-use std::net::SocketAddr;
-
 pub fn send_packet(server: &mut ServerData, ip: SocketAddr, packet: Packet) {
-    let id = match server.players.get(&ip) {
-        Some(i) => *i,
+    let user = match server.users.iter_mut().find(|p| p.ip == ip) {
+        Some(p) => p,
         None => {
-            info!("Player not found {:?}", &ip);
+            info!("Player not found! {:?}", &ip);
             return;
         }
     };
-    let session_id = match server.tokens.get(&id) {
-        Some(i) => i,
-        None => {
-            info!("Session ID not found {:?}", &ip);
-            return;
-        }
-    };
-    if session_id != &packet.session_id {
+
+    if user.token != packet.session_id {
         info!("Invalid session ID {:?}", &ip);
         return;
     };
-    match server.send_queue.entry(id) {
-        Entry::Occupied(o) => {
-            o.into_mut().push(packet);
-        }
-        Entry::Vacant(v) => {
-            v.insert(vec![packet]);
-        }
-    }
+
+    user.send_queue.push(packet);
 }
 
 pub fn receive_packet(server: &mut ServerData, ip: SocketAddr, packet: Packet) {
-    let id = match server.players.get(&ip) {
-        Some(i) => *i,
+    let user = match server.users.iter_mut().find(|p| p.ip == ip) {
+        Some(p) => p,
         None => {
-            info!("Player not found {:?}", &ip);
+            info!("Player not found! {:?}", &ip);
             return;
         }
     };
-    let session_id = match server.tokens.get(&id) {
-        Some(i) => i,
-        None => {
-            info!("Session ID not found {:?}", &ip);
-            return;
-        }
-    };
-    if session_id != &packet.session_id {
+
+    if user.token != packet.session_id {
         info!("Invalid session ID {:?}", &ip);
         return;
     };
-    match server.receive_queue.entry(id) {
-        Entry::Occupied(o) => {
-            o.into_mut().push(packet);
-        }
-        Entry::Vacant(v) => {
-            v.insert(vec![packet]);
-        }
-    }
+
+    user.receive_queue.push(packet);
 }
 
 pub fn get_timestamp() -> u128 {

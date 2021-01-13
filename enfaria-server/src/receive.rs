@@ -8,7 +8,7 @@ use std::{net::SocketAddr, path::Path, sync::Arc};
 pub fn receive_data(server: Arc<RwLock<ServerData>>, socket: Arc<UdpSocket>, pool: Arc<MySqlPool>) {
     task::block_on(async move {
         loop {
-            let mut buf = [0; 1000];
+            let mut buf = [0; 10000];
             let (amt, ip) = urcontinue!(socket.recv_from(&mut buf).await);
             if amt == 0 {
                 info!("Received no data from {:?}", &ip);
@@ -63,26 +63,24 @@ pub async fn connect_player(server: &mut ServerData, ip: SocketAddr, packet: &Pa
     let id = UserId(*pid);
 
     *pid += 1;
-    server.players.insert(ip, id);
-    server.tokens.insert(id, packet.session_id.clone());
-    server.usernames.insert(id, username.clone());
 
-    info!("Player added: {:?}", &username);
-
-    send_map(server, id, ip, &username, &packet.session_id)
-}
-
-pub fn send_map(server: &mut ServerData, id: UserId, ip: SocketAddr, username: &str, session_id: &str) {
     let map;
 
     if Path::new(&format!("data/{}/map", username)).exists() {
         map = get_map(&format!("data/{}/map", username));
-        server.maps.insert(id, map.clone());
     } else {
-        map = get_map("templates/farm.toml");
-        server.maps.insert(id, map.clone());
+        map = get_map("templates/farm.json");
     }
 
+    info!("Player added: {:?}", &username);
+
+    let user = User::new(id, ip, username, packet.session_id.clone(), map.clone());
+    server.users.push(user);
+
+    send_map(server, id, ip, packet.session_id.clone(), map);
+}
+
+pub fn send_map(server: &mut ServerData, id: UserId, ip: SocketAddr, token: String, map: Map) {
     let mut pos_x = 0;
     let mut pos_y = 0;
     for row in map.tiles {
@@ -98,7 +96,7 @@ pub fn send_map(server: &mut ServerData, id: UserId, ip: SocketAddr, username: &
                     column,
                 )),
                 destination: ip,
-                session_id: session_id.to_string(),
+                session_id: token.clone(),
             };
             send_packet(server, ip, packet);
             pos_x += 32
@@ -109,10 +107,6 @@ pub fn send_map(server: &mut ServerData, id: UserId, ip: SocketAddr, username: &
 }
 
 pub fn ping_user(server: &mut ServerData, ip: SocketAddr) {
-    let id = match server.players.get(&ip) {
-        Some(i) => *i,
-        None => return,
-    };
-
-    server.times.insert(id, get_timestamp());
+    let user = server.user_by_ip_mut(ip).unwrap();
+    user.time = get_timestamp();
 }
