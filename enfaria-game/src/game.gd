@@ -45,6 +45,17 @@ func _process(_delta):
                     tile = Grass.new()
             tile.position = Vector2(split[1], split[2])
             get_node("Map").add_child(tile)
+        if "create_player" in command:
+            var split = command.split(" ")
+            var player = preload("res://src/player/player.tscn").instance()
+            player.position = Vector2(split[1], split[2])
+            get_node("Player").add_child(player)
+        if "move" in command:
+            var split = command.split(" ")
+            var player = get_node("Player/Player")
+            player.position = Vector2(split[1], split[2])
+            player.z = split[3]
+    packets.clear()
 
 
 func _notification(what):

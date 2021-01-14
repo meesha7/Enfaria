@@ -7,6 +7,7 @@ var server_ip = "127.0.0.1"
 var server_port = 8888
 var session_id = ""
 
+var beat = 0
 var last_timestamp = 0
 var send_queue = []
 var receive_queue = []
@@ -18,6 +19,8 @@ func generate_packet(data):
     p.set_destination(server_ip + ":" + str(server_port))
     p.set_session_id(session_id)
     p.set_command(data)
+    p.set_beat(beat)
+    beat += 1
     send_queue.append(p)
 
 

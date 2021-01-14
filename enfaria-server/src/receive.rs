@@ -72,15 +72,29 @@ pub async fn connect_player(server: &mut ServerData, ip: SocketAddr, packet: &Pa
         map = get_map("templates/farm.json");
     }
 
+    let player;
+
+    if Path::new(&format!("data/{}/player", username)).exists() {
+        player = get_player(&format!("data/{}/player", username));
+    } else {
+        player = get_player("templates/player.json");
+    }
+
     info!("Player added: {:?}", &username);
 
-    let user = User::new(id, ip, username, packet.session_id.clone(), map.clone());
+    let user = User::new(id, ip, username, packet.session_id.clone(), map, player);
     server.users.push(user);
 
-    send_map(server, id, ip, packet.session_id.clone(), map);
+    send_map(server, id);
+    send_player(server, id);
 }
 
-pub fn send_map(server: &mut ServerData, id: UserId, ip: SocketAddr, token: String, map: Map) {
+pub fn send_map(server: &mut ServerData, id: UserId) {
+    let user = server.user_by_id(id).unwrap();
+    let ip = user.ip;
+    let token = user.token.clone();
+    let map = user.map.clone();
+
     let mut pos_x = 0;
     let mut pos_y = 0;
     for row in map.tiles {
@@ -104,6 +118,23 @@ pub fn send_map(server: &mut ServerData, id: UserId, ip: SocketAddr, token: Stri
         pos_x = 0;
         pos_y += 32;
     }
+}
+
+pub fn send_player(server: &mut ServerData, id: UserId) {
+    let user = server.user_by_id(id).unwrap();
+    let ip = user.ip;
+    let token = user.token.clone();
+    let player = user.player.clone();
+    let username = user.username.clone();
+
+    let packet = Packet {
+        beat: 0,
+        command: Command::CreatePlayer((player.position, username)),
+        destination: ip,
+        session_id: token,
+    };
+
+    send_packet(server, ip, packet);
 }
 
 pub fn ping_user(server: &mut ServerData, ip: SocketAddr) {

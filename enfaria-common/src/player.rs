@@ -5,8 +5,8 @@ use std::fs::{self, read_to_string};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Player {
-    position: Position,
-    inventory: HashMap<u16, Item>,
+    pub position: Position,
+    pub inventory: HashMap<u16, Item>,
 }
 
 pub fn get_player(path: &str) -> Player {

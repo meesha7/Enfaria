@@ -17,10 +17,10 @@ macro_rules! urcontinue {
 }
 
 pub fn send_packet(server: &mut ServerData, ip: SocketAddr, packet: Packet) {
-    let user = match server.users.iter_mut().find(|p| p.ip == ip) {
-        Some(p) => p,
+    let user = match server.user_by_ip_mut(ip) {
+        Some(u) => u,
         None => {
-            info!("Player not found! {:?}", &ip);
+            info!("User not found! {:?}", &ip);
             return;
         }
     };
@@ -34,10 +34,10 @@ pub fn send_packet(server: &mut ServerData, ip: SocketAddr, packet: Packet) {
 }
 
 pub fn receive_packet(server: &mut ServerData, ip: SocketAddr, packet: Packet) {
-    let user = match server.users.iter_mut().find(|p| p.ip == ip) {
-        Some(p) => p,
+    let user = match server.user_by_ip_mut(ip) {
+        Some(u) => u,
         None => {
-            info!("Player not found! {:?}", &ip);
+            info!("User not found! {:?}", &ip);
             return;
         }
     };

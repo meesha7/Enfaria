@@ -34,24 +34,38 @@ pub struct User {
     pub username: String,
     pub token: String,
     pub time: u128,
-    pub position: Position,
     pub map: Map,
+    pub player: Player,
     pub send_queue: Vec<Packet>,
     pub receive_queue: Vec<Packet>,
 }
 
 impl User {
-    pub fn new(id: UserId, ip: SocketAddr, username: String, token: String, map: Map) -> Self {
+    pub fn new(id: UserId, ip: SocketAddr, username: String, token: String, map: Map, player: Player) -> Self {
         User {
             id,
             ip,
             username,
             token,
             time: get_timestamp(),
-            position: Position::default(),
             map,
+            player,
             send_queue: vec![],
             receive_queue: vec![],
         }
+    }
+
+    pub fn send_packet(&mut self, packet: Packet) {
+        if self.token != packet.session_id {
+            info!("Invalid session ID {:?}", &self.username);
+            return;
+        };
+
+        if self.ip != packet.destination {
+            info!("Invalid destination {:?}", &self.username);
+            return;
+        };
+
+        self.send_queue.push(packet);
     }
 }
