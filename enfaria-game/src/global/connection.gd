@@ -64,15 +64,22 @@ func send_packets():
 
 
 func join():
-    connection.connect_to_host(server_ip, server_port)
+    var result = connection.connect_to_host(server_ip, server_port)
+    if result != OK:
+        return false
+    
     last_timestamp = OS.get_ticks_msec()
     var p = packet.new()
     p.set_destination(server_ip + ":" + str(server_port))
     p.set_session_id(session_id)
     p.set_command("connect")
-    connection.put_packet(p.to_bytes())
+    
+    result = connection.put_packet(p.to_bytes())
+    if result != OK:
+        return false
+    
     connected = true
-
+    return true
 
 func leave():
     var p = packet.new()

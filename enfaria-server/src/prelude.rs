@@ -53,6 +53,6 @@ pub fn receive_packet(server: &mut ServerData, ip: SocketAddr, packet: Packet) {
 pub fn get_timestamp() -> u128 {
     std::time::SystemTime::now()
         .duration_since(std::time::SystemTime::UNIX_EPOCH)
-        .unwrap()
+        .expect("Time went backwards.")
         .as_millis()
 }

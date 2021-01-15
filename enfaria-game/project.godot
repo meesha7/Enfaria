@@ -20,6 +20,11 @@ _global_script_classes=[ {
 "path": "res://src/tiles/grass.gd"
 }, {
 "base": "Node2D",
+"class": "Hoe",
+"language": "GDScript",
+"path": "res://src/objects/hoe.gd"
+}, {
+"base": "Node2D",
 "class": "Item",
 "language": "GDScript",
 "path": "res://src/objects/item.gd"
@@ -32,6 +37,7 @@ _global_script_classes=[ {
 _global_script_class_icons={
 "Blocker": "",
 "Grass": "",
+"Hoe": "",
 "Item": "",
 "Tile": ""
 }
@@ -95,6 +101,11 @@ Left={
 Right={
 "deadzone": 0.5,
 "events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":68,"unicode":0,"echo":false,"script":null)
+ ]
+}
+Inventory={
+"deadzone": 0.5,
+"events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":69,"unicode":0,"echo":false,"script":null)
  ]
 }
 

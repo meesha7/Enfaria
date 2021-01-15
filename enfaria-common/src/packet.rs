@@ -1,6 +1,6 @@
 use crate::*;
 use serde::{Deserialize, Serialize};
-use std::net::SocketAddr;
+use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 
 #[derive(Debug, Clone, Serialize, Deserialize, NativeClass)]
 #[inherit(Reference)]
@@ -17,7 +17,7 @@ impl Packet {
         Packet {
             beat: 0,
             session_id: "".to_string(),
-            destination: "0.0.0.0:8888".parse().unwrap(),
+            destination: SocketAddr::new(IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)), 8888),
             command: Command::Quit,
         }
     }
@@ -44,7 +44,7 @@ impl Packet {
 
     #[export]
     pub fn set_destination(&mut self, _owner: &Reference, destination: String) {
-        self.destination = destination.parse().unwrap()
+        self.destination = gresult!(destination.parse())
     }
 
     #[export]
@@ -73,12 +73,12 @@ impl Packet {
     #[allow(clippy::wrong_self_convention)]
     #[export]
     pub fn to_bytes(&self, _owner: &Reference) -> Vec<u8> {
-        bincode::serialize(self).unwrap()
+        gresult!(bincode::serialize(self))
     }
 
     #[export]
     pub fn from_bytes(&mut self, owner: &Reference, bytes: Vec<u8>) {
-        let packet: Packet = bincode::deserialize(&bytes).unwrap();
+        let packet: Packet = gresult!(bincode::deserialize(&bytes));
         self.set_all(
             owner,
             packet.beat,

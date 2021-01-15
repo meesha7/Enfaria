@@ -39,16 +39,15 @@ func _on_getserver_completed(_result, response_code, _headers, body):
         get_node("Container/ButtonContainer/Buttons/Login").timeout = 4
         get_node("Container/ButtonContainer/Buttons/Login").request(url + "/api/login", [], true, HTTPClient.METHOD_POST, payload)
     else:
-        get_parent().get_parent().get_node("Container/FieldContainer/Fields/Error").text = "Failed to connect."
+        get_node("Container/FieldContainer/Fields/Error").text = "Failed to connect."
 
 
 func _on_login_completed(_result, response_code, _headers, body):
     if response_code == 200:
         get_node("/root/connection").session_id = body.get_string_from_utf8().replace("\"", "")
-        get_node("/root/connection").join()
-        tree.change_scene("res://src/game.tscn")
-    else:
-        get_parent().get_parent().get_node("Container/FieldContainer/Fields/Error").text = "Failed to connect."
+        if get_node("/root/connection").join():
+            tree.change_scene("res://src/game.tscn")
+    get_node("Container/FieldContainer/Fields/Error").text = "Failed to connect."
 
 
 func _on_option_pressed():

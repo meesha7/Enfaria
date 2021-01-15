@@ -31,30 +31,24 @@ pub fn receive_data(server: Arc<RwLock<ServerData>>, socket: Arc<UdpSocket>, poo
 }
 
 pub async fn connect_player(server: &mut ServerData, ip: SocketAddr, packet: &Packet, pool: &MySqlPool) {
-    let row = sqlx::query("SELECT CAST(user_id as UNSIGNED) FROM sessions WHERE secret = ?")
+    let row = match sqlx::query("SELECT CAST(user_id as UNSIGNED) FROM sessions WHERE secret = ?")
         .bind(&packet.session_id)
         .fetch_one(pool)
-        .await;
-    if row.is_err() {
-        return;
-    };
-    let row = row.unwrap();
-    if row.is_empty() {
-        return;
+        .await
+    {
+        Ok(r) => r,
+        Err(_) => return,
     };
 
     let user_id: u64 = row.get(0);
 
-    let row = sqlx::query("SELECT username FROM users WHERE id = ?")
+    let row = match sqlx::query("SELECT username FROM users WHERE id = ?")
         .bind(&user_id)
         .fetch_one(pool)
-        .await;
-    if row.is_err() {
-        return;
-    };
-    let row = row.unwrap();
-    if row.is_empty() {
-        return;
+        .await
+    {
+        Ok(r) => r,
+        Err(_) => return,
     };
 
     let username: String = row.get(0);
@@ -67,17 +61,23 @@ pub async fn connect_player(server: &mut ServerData, ip: SocketAddr, packet: &Pa
     let map;
 
     if Path::new(&format!("data/{}/map", username)).exists() {
-        map = get_map(&format!("data/{}/map", username));
+        map = match get_map(&format!("data/{}/map", username)) {
+            Ok(m) => m,
+            Err(_) => get_map("templates/farm.json").expect("Default map template not found."),
+        };
     } else {
-        map = get_map("templates/farm.json");
+        map = get_map("templates/farm.json").expect("Default map template not found.");
     }
 
     let player;
 
     if Path::new(&format!("data/{}/player", username)).exists() {
-        player = get_player(&format!("data/{}/player", username));
+        player = match get_player(&format!("data/{}/player", username)) {
+            Ok(p) => p,
+            Err(_) => get_player("templates/player.json").expect("Default player template not found."),
+        };
     } else {
-        player = get_player("templates/player.json");
+        player = get_player("templates/player.json").expect("Default player template not found.");
     }
 
     info!("Player added: {:?}", &username);
@@ -90,7 +90,7 @@ pub async fn connect_player(server: &mut ServerData, ip: SocketAddr, packet: &Pa
 }
 
 pub fn send_map(server: &mut ServerData, id: UserId) {
-    let user = server.user_by_id(id).unwrap();
+    let user = server.user_by_id(id).expect("Failed to get user that just connected.");
     let ip = user.ip;
     let token = user.token.clone();
     let map = user.map.clone();
@@ -121,7 +121,9 @@ pub fn send_map(server: &mut ServerData, id: UserId) {
 }
 
 pub fn send_player(server: &mut ServerData, id: UserId) {
-    let user = server.user_by_id(id).unwrap();
+    let user = server
+        .user_by_id_mut(id)
+        .expect("Failed to get user that just connected.");
     let ip = user.ip;
     let token = user.token.clone();
     let player = user.player.clone();
@@ -131,13 +133,26 @@ pub fn send_player(server: &mut ServerData, id: UserId) {
         beat: 0,
         command: Command::CreatePlayer((player.position, username)),
         destination: ip,
-        session_id: token,
+        session_id: token.clone(),
     };
 
-    send_packet(server, ip, packet);
+    user.send_packet(packet);
+
+    for (slot, item) in player.inventory.into_iter() {
+        let packet = Packet {
+            beat: 0,
+            command: Command::CreateItem((slot, item)),
+            destination: ip,
+            session_id: token.clone(),
+        };
+        user.send_packet(packet);
+    }
 }
 
 pub fn ping_user(server: &mut ServerData, ip: SocketAddr) {
-    let user = server.user_by_ip_mut(ip).unwrap();
+    let user = match server.user_by_ip_mut(ip) {
+        Some(u) => u,
+        None => return,
+    };
     user.time = get_timestamp();
 }

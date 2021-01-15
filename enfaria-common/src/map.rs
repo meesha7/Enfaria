@@ -1,5 +1,6 @@
 use crate::{position::Position, tile::Tile};
 use serde::{Deserialize, Serialize};
+use std::error::Error;
 use std::fs::{self, read_to_string};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -30,11 +31,12 @@ impl Map {
     }
 }
 
-pub fn get_map(path: &str) -> Map {
-    let s = read_to_string(path).unwrap();
-    serde_json::from_str(&s).unwrap()
+pub fn get_map(path: &str) -> Result<Map, Box<dyn Error>> {
+    let s = read_to_string(path)?;
+    serde_json::from_str(&s).map_err(|e| e.into())
 }
 
-pub fn save_map(path: &str, map: &Map) {
-    fs::write(path, serde_json::to_string_pretty(map).unwrap()).unwrap();
+pub fn save_map(path: &str, map: &Map) -> Result<(), Box<dyn Error>> {
+    fs::write(path, serde_json::to_string_pretty(map)?)?;
+    Ok(())
 }

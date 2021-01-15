@@ -16,6 +16,32 @@ pub mod player;
 pub mod position;
 pub mod tile;
 
+#[macro_export]
+macro_rules! gresult {
+    ($e:expr) => {
+        match $e {
+            Ok(k) => k,
+            Err(e) => {
+                godot_error!("Rust Error: {:?}", e);
+                panic!();
+            }
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! goption {
+    ($e:expr) => {
+        match $e {
+            Some(s) => s,
+            None => {
+                godot_error!("Rust None");
+                panic!();
+            }
+        }
+    };
+}
+
 fn init(handle: InitHandle) {
     handle.add_class::<Packet>();
 }

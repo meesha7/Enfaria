@@ -1,3 +1,4 @@
+use crate::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Default, Debug, Copy, Clone, PartialEq, Serialize, Deserialize)]
@@ -15,7 +16,7 @@ impl From<String> for Position {
 
 impl From<&str> for Position {
     fn from(s: &str) -> Self {
-        let split: Vec<u64> = s.split(' ').map(|x| x.parse().unwrap()).collect();
+        let split: Vec<u64> = s.split(' ').map(|x| gresult!(x.parse())).collect();
         Position {
             x: split[0],
             y: split[1],

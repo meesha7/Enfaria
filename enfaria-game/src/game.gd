@@ -17,17 +17,13 @@ func _input(event):
     var inventory = get_node("Inventory")
     if event.scancode == KEY_ESCAPE:
         var popup = get_node("Pause/Popup")
-        if inventory.visible:
-            inventory.hide()
-        elif popup.visible:
+        inventory.hide_inventory()
+        if popup.visible:
             popup.hide()
         else:
             popup.show()
-    if event.scancode == KEY_E:
-        if inventory.visible:
-            inventory.hide()
-        else:
-            inventory.show()
+    if event.is_action_pressed("Inventory"):
+        inventory.toggle_inventory()
 
 
 func _process(_delta):
@@ -35,6 +31,7 @@ func _process(_delta):
     for index in packets.size():
         var packet = packets[index]
         var command = packet.get_command()
+
         if "create_tile" in command:
             var split = command.split(" ")
             var tile
@@ -45,16 +42,32 @@ func _process(_delta):
                     tile = Grass.new()
             tile.position = Vector2(split[1], split[2])
             get_node("Map").add_child(tile)
+
         if "create_player" in command:
             var split = command.split(" ")
             var player = preload("res://src/player/player.tscn").instance()
             player.position = Vector2(split[1], split[2])
             get_node("Player").add_child(player)
-        if "move" in command:
+
+        if "move " in command:
             var split = command.split(" ")
             var player = get_node("Player/Player")
             player.position = Vector2(split[1], split[2])
             player.z = split[3]
+
+        if "create_item" in command:
+            var split = command.split(" ")
+            var pos = split[1]
+            var item
+            match split[2]:
+                "Hoe":
+                    item = Hoe.new()
+            var name = "Slot"
+            name += str(pos)
+            var slot = get_node("Inventory").find_node(name, true, false)
+            slot.occupied = true
+            slot.add_child(item)
+
     packets.clear()
 
 

@@ -9,6 +9,7 @@ use std::{
 };
 
 pub mod handle_quits;
+pub mod move_items;
 pub mod move_players;
 pub mod ping_players;
 pub mod send_data;
@@ -28,6 +29,7 @@ pub fn server_loop(server: Arc<RwLock<ServerData>>, socket: Arc<UdpSocket>, _poo
                 // processing goes here
 
                 move_players::move_players(&mut s);
+                move_items::move_items(&mut s);
 
                 // end of processing
 

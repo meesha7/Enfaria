@@ -31,14 +31,16 @@ fn main() {
     env_logger::init();
 
     let server = Arc::new(RwLock::new(ServerData::default()));
-    let server_ip: SocketAddr = SERVER_IP.parse().unwrap();
-    let socket = Arc::new(task::block_on(async { UdpSocket::bind(server_ip).await.unwrap() }));
+    let server_ip: SocketAddr = SERVER_IP.parse().expect("Invalid server IP provided.");
+    let socket = Arc::new(task::block_on(async {
+        UdpSocket::bind(server_ip).await.expect("Failed to bind to socket.")
+    }));
     let pool = Arc::new(task::block_on(async {
         MySqlPoolOptions::new()
             .max_connections(5)
-            .connect(&env::var("DATABASE_URL").unwrap())
+            .connect(&env::var("DATABASE_URL").expect("DATABASE_URL environment variable not found."))
             .await
-            .unwrap()
+            .expect("Failed to connect to database.")
     }));
 
     let server_c = server.clone();

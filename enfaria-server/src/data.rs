@@ -11,7 +11,7 @@ impl ServerData {
         self.users.iter().find(|u| u.id == id)
     }
 
-    pub fn _user_by_id_mut(&mut self, id: UserId) -> Option<&mut User> {
+    pub fn user_by_id_mut(&mut self, id: UserId) -> Option<&mut User> {
         self.users.iter_mut().find(|u| u.id == id)
     }
 

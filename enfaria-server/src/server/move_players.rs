@@ -18,11 +18,10 @@ pub fn move_players(server: &mut ServerData) {
             }
         }
 
-        if final_pos.is_none() {
-            continue;
+        let position = match final_pos {
+            Some(p) => p,
+            None => continue,
         };
-
-        let position = final_pos.unwrap();
 
         let packet = Packet {
             beat: server.beat,

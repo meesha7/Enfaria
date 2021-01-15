@@ -39,8 +39,8 @@ pub fn handle_quits(server: &mut ServerData) {
                 continue;
             }
         };
-        save_map(&format!("data/{}/map", user.username), &user.map);
-        save_player(&format!("data/{}/player", user.username), &user.player);
+        urcontinue!(save_map(&format!("data/{}/map", user.username), &user.map));
+        urcontinue!(save_player(&format!("data/{}/player", user.username), &user.player));
         info!("Player quit: {:?}", &user.username);
     }
 
