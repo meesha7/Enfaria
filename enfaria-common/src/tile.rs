@@ -1,15 +1,11 @@
+use crate::*;
 use serde::{Deserialize, Serialize};
-use std::{
-    collections::HashMap,
-    fmt::{Display, Formatter},
-};
+use std::fmt::{Display, Formatter};
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize, FromVariant, ToVariant)]
 #[serde(rename = "tile")]
 pub struct Tile {
     pub name: String,
-    #[serde(default)]
-    pub data: HashMap<String, String>,
 }
 
 impl Display for Tile {
@@ -26,9 +22,6 @@ impl From<String> for Tile {
 
 impl From<&str> for Tile {
     fn from(s: &str) -> Self {
-        Tile {
-            name: s.to_string(),
-            data: HashMap::new(),
-        }
+        Tile { name: s.to_string() }
     }
 }

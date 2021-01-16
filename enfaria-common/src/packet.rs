@@ -5,7 +5,9 @@ use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 #[derive(Debug, Clone, Serialize, Deserialize, NativeClass)]
 #[inherit(Reference)]
 pub struct Packet {
+    #[property]
     pub beat: u64,
+    #[property]
     pub session_id: String,
     pub destination: SocketAddr,
     pub command: Command,
@@ -23,26 +25,6 @@ impl Packet {
     }
 
     #[export]
-    pub fn set_beat(&mut self, _owner: &Reference, beat: u64) {
-        self.beat = beat;
-    }
-
-    #[export]
-    pub fn get_beat(&self, _owner: &Reference) -> u64 {
-        self.beat
-    }
-
-    #[export]
-    pub fn set_session_id(&mut self, _owner: &Reference, session_id: String) {
-        self.session_id = session_id;
-    }
-
-    #[export]
-    pub fn get_session_id(&self, _owner: &Reference) -> String {
-        self.session_id.clone()
-    }
-
-    #[export]
     pub fn set_destination(&mut self, _owner: &Reference, destination: String) {
         self.destination = gresult!(destination.parse())
     }
@@ -53,21 +35,13 @@ impl Packet {
     }
 
     #[export]
-    pub fn set_command(&mut self, _owner: &Reference, command: String) {
-        self.command = command.into()
+    pub fn set_command(&mut self, _owner: &Reference, command: Command) {
+        self.command = command
     }
 
     #[export]
-    pub fn get_command(&self, _owner: &Reference) -> String {
-        self.command.to_string()
-    }
-
-    #[export]
-    pub fn set_all(&mut self, owner: &Reference, beat: u64, session_id: String, destination: String, command: String) {
-        self.set_beat(owner, beat);
-        self.set_session_id(owner, session_id);
-        self.set_destination(owner, destination);
-        self.set_command(owner, command);
+    pub fn get_command(&self, _owner: &Reference) -> Command {
+        self.command.clone()
     }
 
     #[allow(clippy::wrong_self_convention)]
@@ -79,12 +53,9 @@ impl Packet {
     #[export]
     pub fn from_bytes(&mut self, owner: &Reference, bytes: Vec<u8>) {
         let packet: Packet = gresult!(bincode::deserialize(&bytes));
-        self.set_all(
-            owner,
-            packet.beat,
-            packet.session_id,
-            packet.destination.to_string(),
-            packet.command.to_string(),
-        )
+        self.beat = packet.beat;
+        self.session_id = packet.session_id;
+        self.set_destination(owner, packet.destination.to_string());
+        self.set_command(owner, packet.command);
     }
 }

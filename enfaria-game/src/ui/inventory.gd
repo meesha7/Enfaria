@@ -38,4 +38,4 @@ func drop_data(position, data):
     
     var from = previous_slot.name.right(4)
     var to = new_slot.name.right(4)
-    get_node("/root/connection").generate_packet("move_item %s %s" % [from, to])
+    get_node("/root/connection").generate_packet(Dictionary({"MoveItem":[int(from), int(to)]}))

@@ -1,12 +1,10 @@
+use crate::*;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use std::fmt::{Display, Formatter, Result as FmtResult};
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, FromVariant, ToVariant)]
 pub struct Item {
     pub name: String,
-    #[serde(default)]
-    pub data: HashMap<String, String>,
 }
 
 impl Display for Item {
@@ -23,9 +21,6 @@ impl From<String> for Item {
 
 impl From<&str> for Item {
     fn from(s: &str) -> Self {
-        Item {
-            name: s.to_string(),
-            data: HashMap::new(),
-        }
+        Item { name: s.to_string() }
     }
 }

@@ -16,11 +16,13 @@ onready var packet = preload("res://src/native/enfaria_common.gdns")
 
 func generate_packet(data):
     var p = packet.new()
-    p.set_destination(server_ip + ":" + str(server_port))
-    p.set_session_id(session_id)
-    p.set_command(data)
-    p.set_beat(beat)
+    p.session_id = session_id
+    p.beat = beat
     beat += 1
+    
+    p.set_destination(server_ip + ":" + str(server_port))
+    p.set_command(data)
+    
     send_queue.append(p)
 
 
@@ -48,7 +50,7 @@ func receive_packets():
         var p = packet.new()
         p.from_bytes(raw)
         last_timestamp = OS.get_ticks_msec()
-        if p.get_command() != "ping":
+        if p.get_command() != Dictionary({"Ping":[]}):
             receive_queue.append(p)
         
     if len(receive_queue) > 10000:
@@ -71,8 +73,8 @@ func join():
     last_timestamp = OS.get_ticks_msec()
     var p = packet.new()
     p.set_destination(server_ip + ":" + str(server_port))
-    p.set_session_id(session_id)
-    p.set_command("connect")
+    p.session_id = session_id
+    p.set_command(Dictionary({"Connect": []}))
     
     result = connection.put_packet(p.to_bytes())
     if result != OK:
@@ -83,9 +85,9 @@ func join():
 
 func leave():
     var p = packet.new()
+    p.session_id = session_id
     p.set_destination(server_ip + ":" + str(server_port))
-    p.set_session_id(session_id)
-    p.set_command("quit")
+    p.set_command(Dictionary({"Quit": []}))
     connection.put_packet(p.to_bytes())
     connection.close()
     connected = false

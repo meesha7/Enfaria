@@ -17,6 +17,5 @@ func _physics_process(_delta):
         destination.y += WALK_SPEED
     
     if destination != position:
-        var string = "move %s %s %s"
-        var command = string % [destination.x, destination.y, z]
-        get_node("/root/connection").generate_packet(command)
+        var data = Dictionary({"Move": Dictionary({"x": int(destination.x), "y": int(destination.y), "z": z})})
+        get_node("/root/connection").generate_packet(data)

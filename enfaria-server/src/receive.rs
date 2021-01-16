@@ -90,7 +90,10 @@ pub async fn connect_player(server: &mut ServerData, ip: SocketAddr, packet: &Pa
 }
 
 pub fn send_map(server: &mut ServerData, id: UserId) {
-    let user = server.user_by_id(id).expect("Failed to get user that just connected.");
+    let user = match server.user_by_id(id) {
+        Some(u) => u,
+        None => return,
+    };
     let ip = user.ip;
     let token = user.token.clone();
     let map = user.map.clone();
@@ -121,9 +124,10 @@ pub fn send_map(server: &mut ServerData, id: UserId) {
 }
 
 pub fn send_player(server: &mut ServerData, id: UserId) {
-    let user = server
-        .user_by_id_mut(id)
-        .expect("Failed to get user that just connected.");
+    let user = match server.user_by_id_mut(id) {
+        Some(u) => u,
+        None => return,
+    };
     let ip = user.ip;
     let token = user.token.clone();
     let player = user.player.clone();

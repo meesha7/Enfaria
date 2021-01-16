@@ -5,6 +5,10 @@ pub fn move_players(server: &mut ServerData) {
         let mut final_pos = None;
         for packet in user.receive_queue.iter() {
             if let Command::Move(mov) = packet.command {
+                let Position { x, y, z } = mov;
+                if x % 4 != 0 || y % 4 != 0 || z % 4 != 0 {
+                    return;
+                }
                 if !user.map.can_visit(mov) {
                     continue;
                 }

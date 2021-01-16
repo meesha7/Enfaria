@@ -17,10 +17,6 @@ impl Map {
             return false;
         };
 
-        if tile.data.get("blocker").is_some() {
-            return true;
-        };
-
         true
     }
 

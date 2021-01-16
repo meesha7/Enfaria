@@ -6,7 +6,7 @@ func _ready():
 
 
 func _on_timeout():
-    get_node("/root/connection").generate_packet("ping")
+    get_node("/root/connection").generate_packet(Dictionary({"Ping":[]}))
 
 
 func _input(event):
@@ -32,39 +32,50 @@ func _process(_delta):
         var packet = packets[index]
         var command = packet.get_command()
 
-        if "create_tile" in command:
-            var split = command.split(" ")
+        if command.has("CreateTile"):
+            var data = command.get("CreateTile")
+            var position = data[0]
+            var name = data[1]
+            
             var tile
-            match split[4]:
+            match name.get("name"):
                 "Blocker":
                     tile = Blocker.new()
                 "Grass":
                     tile = Grass.new()
-            tile.position = Vector2(split[1], split[2])
+            
+            tile.position = Vector2(position.get("x"), position.get("y"))
             get_node("Map").add_child(tile)
 
-        if "create_player" in command:
-            var split = command.split(" ")
+        if command.has("CreatePlayer"):
+            var data = command.get("CreatePlayer")
+            var position = data[0]
+            
             var player = preload("res://src/player/player.tscn").instance()
-            player.position = Vector2(split[1], split[2])
+            player.position = Vector2(position.get("x"), position.get("y"))
+            
             get_node("Player").add_child(player)
 
-        if "move " in command:
-            var split = command.split(" ")
+        if command.has("Move"):
+            var data = command.get("Move")
+            
             var player = get_node("Player/Player")
-            player.position = Vector2(split[1], split[2])
-            player.z = split[3]
+            player.position = Vector2(data.get("x"), data.get("y"))
+            player.z = data.get("z")
 
-        if "create_item" in command:
-            var split = command.split(" ")
-            var pos = split[1]
+        if command.has("CreateItem"):
+            var data = command.get("CreateItem")
+            var pos = data[0]
+            var name = data[1].get("name")
+            
             var item
-            match split[2]:
+            match name:
                 "Hoe":
                     item = Hoe.new()
-            var name = "Slot"
-            name += str(pos)
-            var slot = get_node("Inventory").find_node(name, true, false)
+
+            var sname = "Slot"
+            sname += str(pos)
+            var slot = get_node("Inventory").find_node(sname, true, false)
             slot.occupied = true
             slot.add_child(item)
 
