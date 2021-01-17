@@ -1,8 +1,19 @@
 extends Control
 
+onready var inventory = get_node("Main/Grid")
+onready var hotbar = get_node("VBoxContainer/HBoxContainer/CenterContainer/GridContainer")
 var dragging = null
+var selected = 1
 
 func _input(event):
+    if (event.is_action("Slot1") \
+    or event.is_action("Slot2")  \
+    or event.is_action("Slot3")  \
+    or event.is_action("Slot4")) \
+    and event.is_pressed():
+        handle_switch(event)
+        return
+
     if !(event is InputEventMouseButton):
         return
 
@@ -49,6 +60,50 @@ func _process(_delta):
 
     var pos = get_viewport().get_mouse_position()
     dragging.position = Vector2(pos.x, pos.y)
+
+
+func _ready():
+    add_labels()
+
+    # Selects the first slot.
+    var border = hotbar.get_child(0).find_node("Selected", true, false)
+    border.visible = true
+
+
+# Dynamically add labels to hotbar slots.
+func add_labels():
+    var num = 1
+    for slot in hotbar.get_children():
+        var label = Label.new()
+        label.add_color_override("font_color", Color(Color.black))
+        label.text = str(num)
+        label.margin_top = 1
+        label.margin_left = 1
+        num += 1
+        slot.add_child(label)
+
+
+func handle_switch(event):
+    var switch = selected
+    if event.is_action("Slot1"):
+        switch = 1
+    elif event.is_action("Slot2"):
+        switch = 2
+    elif event.is_action("Slot3"):
+        switch = 3
+    elif event.is_action("Slot4"):
+        switch = 4
+
+    if switch == selected:
+        return
+
+    var previous = hotbar.get_child(selected - 1).find_node("Selected", true, false)
+    previous.visible = false
+
+    var new = hotbar.get_child(switch - 1).find_node("Selected", true, false)
+    new.visible = true
+
+    selected = switch
 
 
 func toggle_inventory():
