@@ -11,7 +11,7 @@ func hide_chat():
 func show_chat():
     visible = true
     line.call_deferred("grab_focus")
-    
+
 
 func is_visible():
     return visible
@@ -24,8 +24,8 @@ func clear():
 func add_message(msg):
     box.append_bbcode(msg)
     box.newline()
-    
-    
+
+
 func send_message(msg):
     get_node("/root/connection").generate_packet(Dictionary({"ChatSend":msg}))
 
@@ -35,7 +35,7 @@ func _input(event):
         return
     if !event.is_pressed():
         return
-        
+
     if event.scancode != KEY_ENTER:
         return
 

@@ -19,17 +19,17 @@ func generate_packet(data):
     p.session_id = session_id
     p.beat = beat
     beat += 1
-    
+
     p.set_destination(server_ip + ":" + str(server_port))
     p.set_command(data)
-    
+
     send_queue.append(p)
 
 
 func _process(_delta):
     if !connected:
         return
-    
+
     var now = OS.get_ticks_msec()
     if now > last_timestamp + 10000:
         print("Timed out, leaving.")
@@ -44,7 +44,7 @@ func receive_packets():
     var received = connection.get_available_packet_count()
     if received == 0:
         return
-        
+
     for _x in range(received):
         var raw = Array(connection.get_packet())
         var p = packet.new()
@@ -52,7 +52,7 @@ func receive_packets():
         last_timestamp = OS.get_ticks_msec()
         if p.get_command() != Dictionary({"Ping":[]}):
             receive_queue.append(p)
-        
+
     if len(receive_queue) > 10000:
         print("Packet overflow!")
         receive_queue.clear()
@@ -61,7 +61,7 @@ func receive_packets():
 func send_packets():
     for p in send_queue:
         connection.put_packet(p.to_bytes())
-        
+
     send_queue.clear()
 
 
@@ -69,17 +69,17 @@ func join():
     var result = connection.connect_to_host(server_ip, server_port)
     if result != OK:
         return false
-    
+
     last_timestamp = OS.get_ticks_msec()
     var p = packet.new()
     p.set_destination(server_ip + ":" + str(server_port))
     p.session_id = session_id
     p.set_command(Dictionary({"Connect": []}))
-    
+
     result = connection.put_packet(p.to_bytes())
     if result != OK:
         return false
-    
+
     connected = true
     return true
 

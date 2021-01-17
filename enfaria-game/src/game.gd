@@ -85,7 +85,7 @@ func _process(_delta):
             var data = command.get("CreateItem")
             var pos = data[0]
             var name = data[1].get("name")
-            
+
             var item
             match name:
                 "Hoe":

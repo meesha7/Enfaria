@@ -27,15 +27,15 @@ func _on_getserver_completed(_result, response_code, _headers, body):
         var response = body.get_string_from_utf8().replace("\"", "").split(":")
         get_node("/root/connection").server_ip = response[0]
         get_node("/root/connection").server_port = int(response[1])
-        
+
         var username = get_node("Container/FieldContainer/Fields/Username").text
         var password = get_node("Container/FieldContainer/Fields/Password").text
-        
+
         if username == "" or password == "":
             return
-        
+
         var payload = "username" + "=" + username + "&" + "password" + "=" + password
-        
+
         get_node("Container/ButtonContainer/Buttons/Login").timeout = 4
         get_node("Container/ButtonContainer/Buttons/Login").request(url + "/api/login", [], true, HTTPClient.METHOD_POST, payload)
     else:
@@ -60,28 +60,28 @@ func _on_quit_pressed():
 
 func load_config():
     config.load(path)
-    
+
     var fullscreen = false
     var resolution = "1024x720"
-    
+
     resolution = config.get_value("Display", "Resolution", "1024x768")
     fullscreen = config.get_value("Display", "Fullscreen", false)
-        
+
     OS.window_fullscreen = fullscreen
-    
+
     if fullscreen:
         OS.set_window_size(OS.get_screen_size())
     else:
         var split = resolution.split("x", false, 1)
         OS.set_window_size(Vector2(split[0], split[1]))
-        
+
     if config.has_section("Controls"):
         for x in config.get_section_keys("Controls"):
             InputMap.action_erase_events(x)
-            
+
             var event = InputEventKey.new()
             var value = config.get_value("Controls", x)
             var scancode = OS.find_scancode_from_string(value)
-            
+
             event.set_scancode(scancode)
             InputMap.action_add_event(x, event)
