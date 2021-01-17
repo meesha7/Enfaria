@@ -9,7 +9,7 @@ pub enum Command {
     Move(Position),
     CreateTile((Position, Tile)),
     CreatePlayer((Position, String)),
-    CreateItem((u16, Item)),
+    CreateItem((u16, Object)),
     MoveItem((u16, u16)),
     ChatSend(String),
     ChatReceive(String),

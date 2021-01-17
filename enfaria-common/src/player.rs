@@ -7,11 +7,11 @@ use std::fs::{self, read_to_string};
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Player {
     pub position: Position,
-    pub inventory: BTreeMap<u16, Item>,
+    pub inventory: BTreeMap<u16, Object>,
 }
 
 impl Player {
-    pub fn _in_hotbar(&self, item: &Item) -> bool {
+    pub fn _in_hotbar(&self, item: &Object) -> bool {
         for (key, value) in self.inventory.iter() {
             if *key <= 4 && value == item {
                 return true;

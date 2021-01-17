@@ -19,12 +19,12 @@ func _input(event):
             return
 
         var item = slot.get_children()[1]
-        var texture = item.find_node("Sprite", true, false).texture
-        if !texture:
+        var sprite = item.get_children()[0]
+        if !sprite:
             return
 
         dragging = Sprite.new()
-        dragging.texture = texture
+        dragging.texture = sprite.texture
         dragging.modulate.a = 0.5
         add_child(dragging)
         Input.set_mouse_mode(Input.MOUSE_MODE_HIDDEN)
@@ -78,7 +78,7 @@ func get_drag_data(position):
 
 
 func can_drop_data(position, data):
-    if !("item_name" in data):
+    if !("object_name" in data):
         return false
 
     var collided = get_world_2d().direct_space_state.intersect_point(position, 1, [], 4)

@@ -1,8 +1,8 @@
 tool
 
-extends "res://src/objects/item.gd"
+extends "res://src/objects/items/item.gd"
 class_name Hoe
 
 func _init():
-    item_name = "Hoe"
+    object_name = "Hoe"
     sprite_path = "res://assets/hoe.png"

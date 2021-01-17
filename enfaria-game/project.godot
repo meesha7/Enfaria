@@ -14,20 +14,35 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://src/tiles/blocker.gd"
 }, {
+"base": "RigidBody2D",
+"class": "GameObject",
+"language": "GDScript",
+"path": "res://src/objects/object.gd"
+}, {
 "base": "Node2D",
 "class": "Grass",
 "language": "GDScript",
 "path": "res://src/tiles/grass.gd"
 }, {
-"base": "Node2D",
+"base": "RigidBody2D",
 "class": "Hoe",
 "language": "GDScript",
-"path": "res://src/objects/hoe.gd"
+"path": "res://src/objects/items/hoe.gd"
 }, {
-"base": "Node2D",
+"base": "RigidBody2D",
 "class": "Item",
 "language": "GDScript",
-"path": "res://src/objects/item.gd"
+"path": "res://src/objects/items/item.gd"
+}, {
+"base": "RigidBody2D",
+"class": "Plant",
+"language": "GDScript",
+"path": "res://src/objects/plant.gd"
+}, {
+"base": "PhysicsBody2D",
+"class": "PotatoPlant",
+"language": "GDScript",
+"path": "res://src/objects/potato.gd"
 }, {
 "base": "Node2D",
 "class": "Tile",
@@ -36,9 +51,12 @@ _global_script_classes=[ {
 } ]
 _global_script_class_icons={
 "Blocker": "",
+"GameObject": "",
 "Grass": "",
 "Hoe": "",
 "Item": "",
+"Plant": "",
+"PotatoPlant": "",
 "Tile": ""
 }
 
