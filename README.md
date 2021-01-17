@@ -1,26 +1,27 @@
 # Enfaria
-You need a MariaDB/MySql instance running with credentials described at `.env`
 
+Enfaria is a work-in-progress multiplayer game inspired by Stardew Valley. It is currently in a very early phase of development and as such, any information put here would quickly become obsolete.
 
-## Native files
+### Running the game
 
-Run `native.sh` or open it and run the command from inside of the file (Windows users mostly).
+For now, there is no script to run everything.
 
+You will need `enfaria-web` and `enfaria-server` running at the same time. Then you can run the game by opening the project in Godot and pressing F5.
+
+## Contributing
+
+### Native files
+
+Run `native.sh` or open it and run the command from inside of the file.
+
+Alternatively, compile `enfaria-common` and put the resulting .dll/.so file in `enfaria-game/src/native`.
 
 ## DB
 
-Create a user for the local DB:
+You need a MariaDB/MySQL instance running with credentials described at `.env`
 
-`CREATE USER 'enfaria'@'localhost' IDENTIFIED BY 'enfaria';`
+You'll have to create the user and database and make sure the names match.
 
-Create a new DB:
+Use `schema.sql` for the current schema to create your tables.
 
-`CREATE DATABASE enfaria CHARACTER SET = 'utf8mb4' COLLATE 'utf8mb4_general_ci';`
-
-Give privileges to the new DB for the new user:
-
-`GRANT ALL PRIVILEGES ON enfaria.* TO 'enfaria'@'localhost';`
-
-Create DB structure:
-
-`mysql -u enfaria -p'enfaria' enfaria < schema.sql`
+There will be a setup script in the future.
