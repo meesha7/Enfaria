@@ -8,10 +8,11 @@ use std::{
     time::{Duration, Instant},
 };
 
-pub mod handle_quits;
+pub mod chat;
 pub mod move_items;
 pub mod move_players;
-pub mod ping_players;
+pub mod ping;
+pub mod quit;
 pub mod send_data;
 pub mod sort_data;
 
@@ -30,13 +31,14 @@ pub fn server_loop(server: Arc<RwLock<ServerData>>, socket: Arc<UdpSocket>, _poo
 
                 move_players::move_players(&mut s);
                 move_items::move_items(&mut s);
+                chat::chat(&mut s);
 
                 // end of processing
 
                 if s.beat % 40 == 0 {
-                    ping_players::ping_players(&mut s);
+                    ping::ping(&mut s);
                 }
-                handle_quits::handle_quits(&mut s);
+                quit::quit(&mut s);
 
                 users = s.users.clone();
                 s.beat += 1;

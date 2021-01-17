@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use enfaria_common::map::save_map;
 
-pub fn handle_quits(server: &mut ServerData) {
+pub fn quit(server: &mut ServerData) {
     let mut quitters = vec![];
 
     {

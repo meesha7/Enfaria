@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-pub fn ping_players(server: &mut ServerData) {
+pub fn ping(server: &mut ServerData) {
     let mut packets = vec![];
     for user in server.users.iter() {
         let packet = Packet {

@@ -3,30 +3,40 @@ extends Control
 func toggle_inventory():
     var inv = get_node("Main")
     inv.visible = !inv.visible
-    
+
+
 func hide_inventory():
     var inv = get_node("Main")
     inv.visible = false
+
+
+func is_visible():
+    return get_node("Main").visible
+
 
 func get_drag_data(position):
     var collided = get_world_2d().direct_space_state.intersect_point(position, 1, [], 4)
     if len(collided) != 1:
         return null
+    
     var slot = collided[0].collider.get_parent()
     if !slot.occupied:
         return null
+    
     return slot.get_children()[1]
+
 
 func can_drop_data(position, data):
     if !("item_name" in data):
         return false
+    
     var collided = get_world_2d().direct_space_state.intersect_point(position, 1, [], 4)
     if len(collided) != 1:
         return false
+    
     var slot = collided[0].collider.get_parent()
-    if slot.occupied:
-        return false
-    return true
+    return !slot.occupied
+
 
 func drop_data(position, data):
     var new_slot = get_world_2d().direct_space_state.intersect_point(position, 1, [], 4)[0].collider.get_parent()

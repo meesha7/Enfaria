@@ -11,6 +11,8 @@ pub enum Command {
     CreatePlayer((Position, String)),
     CreateItem((u16, Item)),
     MoveItem((u16, u16)),
+    ChatSend(String),
+    ChatReceive(String),
 }
 
 impl Command {
@@ -20,5 +22,9 @@ impl Command {
 
     pub fn is_move_item(&self) -> bool {
         matches!(self, Command::MoveItem(_))
+    }
+
+    pub fn is_chat_send(&self) -> bool {
+        matches!(self, Command::ChatSend(_))
     }
 }
