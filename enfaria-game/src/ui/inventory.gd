@@ -6,13 +6,14 @@ var dragging = null
 var selected = 1
 
 func _input(event):
-    if (event.is_action("Slot1") \
-    or event.is_action("Slot2")  \
-    or event.is_action("Slot3")  \
-    or event.is_action("Slot4")) \
-    and event.is_pressed():
-        handle_switch(event)
-        return
+    # Check if a slot needs changing.
+    if event.is_pressed():
+        for x in range(1, 5):
+            var sname = "Slot"
+            sname += str(x)
+            if event.is_action(sname):
+                handle_switch(x)
+                return
 
     if !(event is InputEventMouseButton):
         return
@@ -26,11 +27,19 @@ func _input(event):
             return
 
         var slot = collided[0].collider.get_parent()
-        if !slot.occupied:
+        if !slot || !slot.occupied:
             return
 
-        var item = slot.get_children()[1]
-        var sprite = item.get_children()[0]
+        var item
+        for x in slot.get_children():
+            if !("object_name" in x):
+                continue
+            item = x
+
+        if !item:
+            return
+
+        var sprite = item.find_node("Sprite", true, false)
         if !sprite:
             return
 
@@ -47,8 +56,9 @@ func _input(event):
     if !event.is_pressed():
         remove_child(dragging)
         dragging = null
+        # This hack is necessary to hide the "forbidden" cursor.
         var pos = get_viewport().get_mouse_position()
-        get_viewport().warp_mouse(Vector2(pos.x + 1, pos.y + 1))
+        get_viewport().warp_mouse(Vector2(pos.x + 1, pos.y))
         yield(get_tree().create_timer(0.01), "timeout")
         Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
         return
@@ -83,17 +93,8 @@ func add_labels():
         slot.add_child(label)
 
 
-func handle_switch(event):
-    var switch = selected
-    if event.is_action("Slot1"):
-        switch = 1
-    elif event.is_action("Slot2"):
-        switch = 2
-    elif event.is_action("Slot3"):
-        switch = 3
-    elif event.is_action("Slot4"):
-        switch = 4
-
+# Handle switching the selected slot.
+func handle_switch(switch):
     if switch == selected:
         return
 
@@ -129,7 +130,13 @@ func get_drag_data(position):
     if !slot.occupied:
         return null
 
-    return slot.get_children()[1]
+    var item
+    for x in slot.get_children():
+        if !("object_name" in x):
+            continue
+        item = x
+
+    return item
 
 
 func can_drop_data(position, data):
@@ -151,11 +158,12 @@ func can_drop_data(position, data):
 func drop_data(position, data):
     var new_slot = get_world_2d().direct_space_state.intersect_point(position, 1, [], 4)[0].collider.get_parent()
     var previous_slot = data.get_parent()
+
     previous_slot.occupied = false
     previous_slot.remove_child(data)
     new_slot.add_child(data)
     new_slot.occupied = true
 
-    var from = previous_slot.name.right(4)
-    var to = new_slot.name.right(4)
-    get_node("/root/connection").generate_packet(Dictionary({"MoveItem":[int(from), int(to)]}))
+    var from = int(previous_slot.name.right(4))
+    var to = int(new_slot.name.right(4))
+    get_node("/root/connection").c_move_item(from, to)

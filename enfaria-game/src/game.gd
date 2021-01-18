@@ -10,7 +10,7 @@ func _ready():
 
 
 func _on_timeout():
-    get_node("/root/connection").generate_packet(Dictionary({"Ping":[]}))
+    get_node("/root/connection").c_ping()
 
 
 func _input(event):

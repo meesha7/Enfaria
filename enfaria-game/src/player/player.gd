@@ -17,5 +17,4 @@ func _physics_process(_delta):
         destination.y += WALK_SPEED
 
     if destination != position:
-        var data = Dictionary({"Move": Dictionary({"x": int(destination.x), "y": int(destination.y), "z": z})})
-        get_node("/root/connection").generate_packet(data)
+        get_node("/root/connection").c_move(Vector3(int(destination.x), int(destination.y), z))

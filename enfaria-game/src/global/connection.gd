@@ -14,17 +14,6 @@ var receive_queue = []
 
 onready var packet = preload("res://src/native/enfaria_common.gdns")
 
-func generate_packet(data):
-    var p = packet.new()
-    p.session_id = session_id
-    p.beat = beat
-    beat += 1
-
-    p.set_destination(server_ip + ":" + str(server_port))
-    p.set_command(data)
-
-    send_queue.append(p)
-
 
 func _process(_delta):
     if !connected:
@@ -35,6 +24,7 @@ func _process(_delta):
         print("Timed out, leaving.")
         leave()
         var _x = get_tree().change_scene("res://src/menu/mainmenu.tscn")
+        return
 
     receive_packets()
     send_packets()
@@ -83,6 +73,7 @@ func join():
     connected = true
     return true
 
+
 func leave():
     var p = packet.new()
     p.session_id = session_id
@@ -91,3 +82,27 @@ func leave():
     connection.put_packet(p.to_bytes())
     connection.close()
     connected = false
+
+
+func generate_packet(data):
+    var p = packet.new()
+    p.session_id = session_id
+    p.beat = beat
+    beat += 1
+
+    p.set_destination(server_ip + ":" + str(server_port))
+    p.set_command(data)
+
+    send_queue.append(p)
+
+
+func c_ping():
+    generate_packet(Dictionary({"Ping":[]}))
+
+
+func c_move(pos):
+    generate_packet(Dictionary({"Move": Dictionary({"x": int(pos.x), "y": int(pos.y), "z": int(pos.z)})}))
+
+
+func c_move_item(from, to):
+    generate_packet(Dictionary({"MoveItem":[from, to]}))
