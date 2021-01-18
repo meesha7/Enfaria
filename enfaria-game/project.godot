@@ -42,7 +42,7 @@ _global_script_classes=[ {
 "base": "RigidBody2D",
 "class": "PotatoPlant",
 "language": "GDScript",
-"path": "res://src/objects/potato.gd"
+"path": "res://src/objects/potato_plant.gd"
 }, {
 "base": "Node2D",
 "class": "Tile",
