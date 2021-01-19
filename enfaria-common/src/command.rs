@@ -13,6 +13,7 @@ pub enum Command {
     MoveItem((u16, u16)),
     ChatSend(String),
     ChatReceive(String),
+    CreateObject((Position, Object)),
 }
 
 impl Command {

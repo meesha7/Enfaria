@@ -3,6 +3,8 @@ extends Control
 onready var inventory = get_node("Inventory")
 onready var chat = get_node("Chat")
 onready var pause = get_node("Pause")
+onready var map = get_node("Map")
+onready var player = get_node("Player")
 
 func _ready():
     var _a = get_node("Pinger").connect("timeout", self, "_on_timeout")
@@ -53,31 +55,40 @@ func _process(_delta):
         if command.has("CreateTile"):
             var data = command.get("CreateTile")
             var position = data[0]
-            var name = data[1]
+            var tiledata = data[1]
 
             var tile
-            match name.get("name"):
+            match tiledata.get("name"):
                 "Blocker":
                     tile = Blocker.new()
                 "Grass":
                     tile = Grass.new()
 
             tile.position = Vector2(position.get("x"), position.get("y"))
-            get_node("Map").add_child(tile)
+            tile.deserialize()
+
+            for objdata in tiledata.get("contains"):
+                var obj
+                match objdata.get("name"):
+                    "PotatoPlant":
+                        obj = PotatoPlant.new()
+
+                obj.position = tile.position
+                obj.deserialize(objdata.get("data"))
+                tile.add_child(obj)
+
+            map.add_child(tile)
 
         if command.has("CreatePlayer"):
             var data = command.get("CreatePlayer")
             var position = data[0]
 
-            var player = preload("res://src/player/player.tscn").instance()
+            player.visible = true
             player.position = Vector2(position.get("x"), position.get("y"))
-
-            get_node("Player").add_child(player)
 
         if command.has("Move"):
             var data = command.get("Move")
 
-            var player = get_node("Player/Player")
             player.position = Vector2(data.get("x"), data.get("y"))
             player.z = data.get("z")
 
@@ -100,6 +111,22 @@ func _process(_delta):
         if command.has("ChatReceive"):
             var data = command.get("ChatReceive")
             chat.add_message(data)
+
+        if command.has("CreateObject"):
+            var data = command.get("CreateObject")
+            var position = Vector2(data[0].get("x"), data[0].get("y"))
+            var objdata = data[1]
+
+            var obj
+            match objdata.get("name"):
+                "PotatoPlant":
+                    obj = PotatoPlant.new()
+
+            var tile = map.get_tile(position)
+            obj.position = tile.position
+            obj.deserialize(objdata.get("data"))
+
+            tile.add_child(obj)
 
     packets.clear()
 

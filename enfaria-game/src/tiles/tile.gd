@@ -1,18 +1,47 @@
 tool
 
-extends Node2D
+extends StaticBody2D
 class_name Tile
 
 var tile_name = "undefined"
-var sprite_path = ""
-var collision_layer = 0
+var sprite_path = "res://assets/unimplemented.png"
 
-const scene = preload("res://src/tiles/tile.tscn")
+var width = 32
+var height = 32
 
 func _ready():
-    var node = scene.instance()
-    if sprite_path:
-        node.get_node("Sprite").texture = load(sprite_path)
-    if collision_layer:
-        node.collision_layer = collision_layer
-    add_child(node)
+    var off_w = height / 2
+    var off_h = height / 2
+
+    var cshape = CollisionShape2D.new()
+    cshape.name = "Shape"
+
+    var shape = RectangleShape2D.new()
+    shape.extents = Vector2(off_w, off_h)
+    cshape.shape = shape
+
+    var sprite = Sprite.new()
+    sprite.name = "Sprite"
+    sprite.texture = load(sprite_path)
+    sprite.position = Vector2(off_w, off_h)
+
+    add_child(cshape)
+    add_child(sprite)
+
+    add_to_group("tile")
+
+
+func serialize():
+    var properties = []
+
+    properties.append("type")
+    properties.append(get_class())
+
+    properties.append("name")
+    properties.append(name)
+
+    return properties
+
+
+func deserialize():
+    return

@@ -17,6 +17,8 @@ func _ready():
 
     add_child(sprite)
 
+    add_to_group("object")
+
 
 func serialize():
     var properties = []
@@ -28,3 +30,7 @@ func serialize():
     properties.append(name)
 
     return properties
+
+
+func deserialize(_properties):
+    return

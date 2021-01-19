@@ -31,6 +31,10 @@ pub fn receive_data(server: Arc<RwLock<ServerData>>, socket: Arc<UdpSocket>, poo
 }
 
 pub async fn connect_player(server: &mut ServerData, ip: SocketAddr, packet: &Packet, pool: &MySqlPool) {
+    if server.user_by_ip(ip).is_some() {
+        return;
+    }
+
     let row = match sqlx::query("SELECT CAST(user_id as UNSIGNED) FROM sessions WHERE secret = ?")
         .bind(&packet.session_id)
         .fetch_one(pool)
@@ -101,7 +105,7 @@ pub fn send_map(server: &mut ServerData, id: UserId) {
     let mut pos_x = 0;
     let mut pos_y = 0;
     for row in map.tiles {
-        for column in row {
+        for tile in row {
             let packet = Packet {
                 beat: 0,
                 command: Command::CreateTile((
@@ -110,7 +114,7 @@ pub fn send_map(server: &mut ServerData, id: UserId) {
                         y: pos_y,
                         z: id.0,
                     },
-                    column,
+                    tile,
                 )),
                 destination: ip,
                 session_id: token.clone(),

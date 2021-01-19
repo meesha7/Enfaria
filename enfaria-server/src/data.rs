@@ -15,7 +15,7 @@ impl ServerData {
         self.users.iter_mut().find(|u| u.id == id)
     }
 
-    pub fn _user_by_ip(&self, ip: SocketAddr) -> Option<&User> {
+    pub fn user_by_ip(&self, ip: SocketAddr) -> Option<&User> {
         self.users.iter().find(|u| u.ip == ip)
     }
 

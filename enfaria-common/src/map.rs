@@ -1,13 +1,13 @@
-use crate::{position::Position, tile::Tile};
+use crate::*;
 use serde::{Deserialize, Serialize};
 use std::error::Error;
-use std::fs::{self, read_to_string};
+use std::fs;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Map {
-    pub tiles: Vec<Vec<Tile>>,
     pub width: u64,
     pub height: u64,
+    pub tiles: Vec<Vec<Tile>>,
 }
 
 impl Map {
@@ -28,7 +28,7 @@ impl Map {
 }
 
 pub fn get_map(path: &str) -> Result<Map, Box<dyn Error>> {
-    let s = read_to_string(path)?;
+    let s = fs::read_to_string(path)?;
     serde_json::from_str(&s).map_err(|e| e.into())
 }
 

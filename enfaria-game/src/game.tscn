@@ -1,9 +1,11 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://src/game.gd" type="Script" id=1]
 [ext_resource path="res://src/ui/chat.tscn" type="PackedScene" id=2]
+[ext_resource path="res://src/map.gd" type="Script" id=3]
 [ext_resource path="res://src/ui/pause.tscn" type="PackedScene" id=4]
 [ext_resource path="res://src/ui/inventory.tscn" type="PackedScene" id=5]
+[ext_resource path="res://src/player/player.tscn" type="PackedScene" id=6]
 
 [node name="Game" type="Control"]
 anchor_right = 1.0
@@ -21,7 +23,9 @@ __meta__ = {
 visible = false
 
 [node name="Map" type="Node2D" parent="."]
+script = ExtResource( 3 )
 
-[node name="Player" type="Node2D" parent="."]
+[node name="Player" parent="." instance=ExtResource( 6 )]
+visible = false
 
 [node name="Pinger" type="Timer" parent="."]
