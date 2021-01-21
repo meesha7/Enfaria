@@ -101,6 +101,10 @@ func _process(_delta):
             match name:
                 "Hoe":
                     item = Hoe.new()
+                "WateringCan":
+                    item = WateringCan.new()
+                "PotatoSeed":
+                    item = PotatoSeed.new()
 
             var sname = "Slot"
             sname += str(pos)
