@@ -57,22 +57,22 @@ func _process(_delta):
             var position = data[0]
             var tiledata = data[1]
 
-            var tile
-            match tiledata.get("name"):
-                "Blocker":
-                    tile = Blocker.new()
-                "Grass":
-                    tile = Grass.new()
+            var tilename = tiledata.get("name")
+            var ct = ClassType.from_name(tilename)
+            if !ct.class_exists():
+                return
 
+            var tile = ct.instance()
             tile.position = Vector2(position.get("x"), position.get("y"))
             tile.deserialize()
 
             for objdata in tiledata.get("contains"):
-                var obj
-                match objdata.get("name"):
-                    "PotatoPlant":
-                        obj = PotatoPlant.new()
+                var objname = objdata.get("name")
+                ct = ClassType.from_name(tilename)
+                if !ct.class_exists():
+                    continue
 
+                var obj = ct.instance(objname)
                 obj.position = tile.position
                 obj.deserialize(objdata.get("data"))
                 tile.add_child(obj)
@@ -97,18 +97,12 @@ func _process(_delta):
             var pos = data[0]
             var name = data[1].get("name")
 
-            var item
-            match name:
-                "Hoe":
-                    item = Hoe.new()
-                "WateringCan":
-                    item = WateringCan.new()
-                "PotatoSeed":
-                    item = PotatoSeed.new()
+            var ct = ClassType.from_name(name)
+            if !ct.class_exists():
+                return
 
-            var sname = "Slot"
-            sname += str(pos)
-            var slot = get_node("Inventory").find_node(sname, true, false)
+            var item = ct.instance()
+            var slot = get_node("Inventory").find_node("Slot%d" % pos, true, false)
             slot.occupied = true
             slot.add_child(item)
 
@@ -120,12 +114,13 @@ func _process(_delta):
             var data = command.get("CreateObject")
             var position = Vector2(data[0].get("x"), data[0].get("y"))
             var objdata = data[1]
+            var objname = objdata.get("name")
 
-            var obj
-            match objdata.get("name"):
-                "PotatoPlant":
-                    obj = PotatoPlant.new()
+            var ct = ClassType.from_name(objname)
+            if !ct.class_exists():
+                return
 
+            var obj = ct.instance()
             var tile = map.get_tile(position)
             obj.position = tile.position
             obj.deserialize(objdata.get("data"))
