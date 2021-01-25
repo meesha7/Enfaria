@@ -1,0 +1,20 @@
+name: Godot
+on:
+  pull_request:
+    branches:
+    - master
+    paths:
+    - "enfaria-game/**"
+
+jobs:
+  gut:
+    name: Run GUT tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Gut (gut.sh)
+        run: |
+          cd enfaria-game
+          sh gut.sh
