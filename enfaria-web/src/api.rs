@@ -1,61 +1,41 @@
 use crate::prelude::*;
-use std::env;
 
-pub fn routes(
-    tera: Arc<Tera>,
-    pool: Arc<MySqlPool>,
-) -> impl Filter<Extract = (impl Reply,), Error = Rejection> + Clone {
-    let login = warp::post()
-        .and(warp::path("api"))
-        .and(warp::path("login"))
-        .and(warp::body::content_length_limit(1024 * 32))
-        .and(warp::body::form())
-        .and(with_db(pool))
-        .and(with_tera(tera))
-        .and_then(login_fn);
+pub fn routes(app: &mut Server<State>) {
+    app.at("api/login")
+        .post(|req: Request<State>| async { login_fn(req).await });
 
-    let getserver = warp::get()
-        .and(warp::path("api"))
-        .and(warp::path("getserver"))
-        .and_then(getserver_fn);
-
-    login.or(getserver)
+    app.at("api/getserver")
+        .get(|mut _req| async { Ok(env::var("SERVER").unwrap()) });
 }
 
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct LoginData {
     username: String,
     password: String,
 }
 
-async fn login_fn(login: LoginData, pool: Arc<MySqlPool>, _tera: Arc<Tera>) -> Result<impl Reply, Rejection> {
-    let query = warp_unwrap!(
-        sqlx::query("SELECT id, password FROM users WHERE username = ?")
-            .bind(login.username)
-            .fetch_one(pool.as_ref())
-            .await
-    );
-    let db_password: Vec<u8> = warp_unwrap!(query.try_get(1));
-    let db_password: String = warp_unwrap!(std::str::from_utf8(&db_password)).to_string();
-    let matches = warp_unwrap!(bcrypt::verify(login.password, &db_password));
-    if !matches {
-        return Err(warp::reject());
-    };
+async fn login_fn(mut req: Request<State>) -> tide::Result {
+    let state = req.state().clone();
+    let pool = state.pool.as_ref();
+    let login: LoginData = req.body_form().await?;
+    let query = sqlx::query("SELECT id, password FROM users WHERE username = ?")
+        .bind(login.username)
+        .fetch_one(pool)
+        .await?;
 
-    let id: i64 = warp_unwrap!(query.try_get(0));
+    let db_password: Vec<u8> = query.try_get(1)?;
+    let db_password: String = std::str::from_utf8(&db_password)?.to_string();
 
-    let query = warp_unwrap!(
-        sqlx::query("SELECT secret FROM sessions WHERE user_id = ?")
-            .bind(id)
-            .fetch_one(pool.as_ref())
-            .await
-    );
-    let session_id: String = query.get(0);
+    bcrypt::verify(login.password, &db_password)?;
 
-    Ok(warp::reply::json(&session_id))
-}
+    let id: i64 = query.try_get(0)?;
 
-async fn getserver_fn() -> Result<impl Reply, Rejection> {
-    let server = env::var("SERVER").unwrap();
-    Ok(warp::reply::json(&server))
+    let query = sqlx::query("SELECT secret FROM sessions WHERE user_id = ?")
+        .bind(id)
+        .fetch_one(pool)
+        .await?;
+
+    let session_id: String = query.try_get(0)?;
+
+    Ok(json!(session_id).into())
 }

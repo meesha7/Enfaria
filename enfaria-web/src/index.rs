@@ -1,64 +1,51 @@
 use crate::prelude::*;
 
-pub fn routes(
-    tera: Arc<Tera>,
-    pool: Arc<MySqlPool>,
-) -> impl Filter<Extract = (impl Reply,), Error = warp::Rejection> + Clone {
-    let auth_index = warp::get()
-        .and(warp::path::end())
-        .and(warp::cookie("session-id"))
-        .and(with_tera(tera.clone()))
-        .and(with_template(Template::new("index.tera")))
-        .and(with_db(pool))
-        .and_then(auth_index_fn);
-
-    let index = warp::get()
-        .and(warp::path::end())
-        .and(with_tera(tera))
-        .and(with_template(Template::new("index.tera")))
-        .map(render);
-
-    auth_index.or(index)
+pub fn routes(app: &mut Server<State>) {
+    app.at("/").get(|req: Request<State>| async {
+        let template = Template::new("index.tera");
+        if let Some(cookie) = req.cookie("session-id") {
+            auth_index_fn(req, cookie.value(), template).await
+        } else {
+            Ok(template.render(req.state().tera.as_ref()))
+        }
+    });
 }
 
-async fn auth_index_fn(
-    cookie: String,
-    tera: Arc<Tera>,
-    mut template: Template,
-    pool: Arc<MySqlPool>,
-) -> Result<impl Reply, Rejection> {
+async fn auth_index_fn(request: Request<State>, cookie: &str, mut template: Template) -> tide::Result {
+    let state = request.state().clone();
+    let tera = state.tera.as_ref();
+    let pool = state.pool.as_ref();
     let domain = env::var("DOMAIN").unwrap();
-    let reply = render(tera.clone(), template.clone());
     let remove_cookie = Cookie::build("session-id", "")
         .expires(OffsetDateTime::now_utc() - TimeDuration::day())
         .path("/")
         .domain(domain)
         .finish();
 
-    let row = warp_unwrap!(
-        sqlx::query("SELECT user_id, expiry_date FROM sessions WHERE secret = ?")
-            .bind(&cookie)
-            .fetch_optional(pool.as_ref())
-            .await
-    );
+    let row = sqlx::query("SELECT user_id, expiry_date FROM sessions WHERE secret = ?")
+        .bind(&cookie)
+        .fetch_optional(pool)
+        .await?;
 
     if row.is_none() {
-        return Ok(warp::reply::with_header(reply, "Set-Cookie", remove_cookie.to_string()));
+        let mut response: Response = template.render(tera).into();
+        response.insert_header("Set-Cookie", remove_cookie.to_string());
+        return Ok(response);
     }
 
     let row = row.unwrap();
-    let date: DateTime<Utc> = warp_unwrap!(row.try_get(1));
+    let date: DateTime<Utc> = row.try_get(1)?;
 
     if Utc::now() > date {
-        warp_unwrap!(
-            sqlx::query("DELETE FROM sessions WHERE secret = ?")
-                .bind(&cookie)
-                .execute(pool.as_ref())
-                .await
-        );
-        return Ok(warp::reply::with_header(reply, "Set-Cookie", remove_cookie.to_string()));
+        sqlx::query("DELETE FROM sessions WHERE secret = ?")
+            .bind(&cookie)
+            .execute(pool)
+            .await?;
+        let mut response: Response = template.render(tera).into();
+        response.insert_header("Set-Cookie", remove_cookie.to_string());
+        return Ok(response);
     }
 
     template.value.insert("logged_in", &true);
-    Ok(warp::reply::with_header(render(tera, template), "", ""))
+    Ok(template.render(tera))
 }

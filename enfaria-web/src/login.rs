@@ -1,23 +1,11 @@
 use crate::prelude::*;
 
-pub fn routes(
-    tera: Arc<Tera>,
-    pool: Arc<MySqlPool>,
-) -> impl Filter<Extract = (impl Reply,), Error = Rejection> + Clone {
-    let login = warp::get()
-        .and(warp::path("login"))
-        .and(with_tera(tera))
-        .and(with_template(Template::new("login.tera")))
-        .map(render);
+pub fn routes(app: &mut Server<State>) {
+    app.at("login")
+        .get(|req: Request<State>| async move { Ok(Template::new("login.tera").render(req.state().tera.as_ref())) });
 
-    let do_login = warp::post()
-        .and(warp::path("login"))
-        .and(warp::body::content_length_limit(1024 * 32))
-        .and(warp::body::form())
-        .and(with_db(pool))
-        .and_then(login_fn);
-
-    login.or(do_login)
+    app.at("login")
+        .post(|req: Request<State>| async { login_fn(req).await });
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -26,41 +14,36 @@ pub struct LoginData {
     password: String,
 }
 
-async fn login_fn(login: LoginData, pool: Arc<MySqlPool>) -> Result<impl Reply, Rejection> {
-    let query = warp_unwrap!(
-        sqlx::query("SELECT id, password FROM users WHERE username = ?")
-            .bind(login.username)
-            .fetch_one(pool.as_ref())
-            .await
-    );
-    let db_password: Vec<u8> = warp_unwrap!(query.try_get(1));
-    let db_password: String = warp_unwrap!(std::str::from_utf8(&db_password)).to_string();
-    let matches = warp_unwrap!(bcrypt::verify(login.password, &db_password));
-    if !matches {
-        return Err(warp::reject::custom(IncorrectPassword));
-    };
+async fn login_fn(mut request: Request<State>) -> tide::Result {
+    let state = request.state().clone();
+    let pool = state.pool.as_ref();
+    let login: LoginData = request.body_form().await?;
+    let query = sqlx::query("SELECT id, password FROM users WHERE username = ?")
+        .bind(login.username)
+        .fetch_one(pool)
+        .await?;
 
-    let id: i64 = warp_unwrap!(query.try_get(0));
+    let db_password: Vec<u8> = query.try_get(1)?;
+    let db_password: String = std::str::from_utf8(&db_password)?.to_string();
+    bcrypt::verify(login.password, &db_password)?;
 
-    warp_unwrap!(
-        sqlx::query("DELETE FROM sessions WHERE user_id = ?")
-            .bind(id)
-            .execute(pool.as_ref())
-            .await
-    );
+    let id: i64 = query.try_get(0)?;
+
+    sqlx::query("DELETE FROM sessions WHERE user_id = ?")
+        .bind(id)
+        .execute(pool)
+        .await?;
 
     let session_id = Uuid::new_v4();
     let expiry_date = Utc::now() + Duration::days(30);
     let expiry_two = OffsetDateTime::now_utc() + 30_i32.days();
 
-    warp_unwrap!(
-        sqlx::query("INSERT INTO sessions (user_id, secret, expiry_date) VALUES (?, ?, ?)")
-            .bind(id)
-            .bind(session_id.to_string())
-            .bind(expiry_date.format("%F %T").to_string())
-            .execute(pool.as_ref())
-            .await
-    );
+    sqlx::query("INSERT INTO sessions (user_id, secret, expiry_date) VALUES (?, ?, ?)")
+        .bind(id)
+        .bind(session_id.to_string())
+        .bind(expiry_date.format("%F %T").to_string())
+        .execute(pool)
+        .await?;
 
     let domain = env::var("DOMAIN").unwrap();
     let cookie = Cookie::build("session-id", session_id.to_string())
@@ -69,9 +52,7 @@ async fn login_fn(login: LoginData, pool: Arc<MySqlPool>) -> Result<impl Reply, 
         .domain(domain)
         .finish();
 
-    Ok(warp::reply::with_header(
-        warp::redirect(Uri::from_static("/")),
-        "Set-Cookie",
-        cookie.to_string(),
-    ))
+    let mut response: Response = Redirect::new("/").into();
+    response.insert_header("Set-Cookie", cookie.to_string());
+    Ok(response)
 }

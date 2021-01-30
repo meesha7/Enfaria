@@ -1,23 +1,10 @@
 use crate::prelude::*;
 
-pub fn routes(
-    tera: Arc<Tera>,
-    pool: Arc<MySqlPool>,
-) -> impl Filter<Extract = (impl Reply,), Error = warp::Rejection> + Clone {
-    let register = warp::get()
-        .and(warp::path("register"))
-        .and(with_tera(tera))
-        .and(with_template(Template::new("register.tera")))
-        .map(render);
+pub fn routes(app: &mut Server<State>) {
+    app.at("register")
+        .get(|req: Request<State>| async move { Ok(Template::new("register.tera").render(req.state().tera.as_ref())) });
 
-    let do_register = warp::post()
-        .and(warp::path("register"))
-        .and(warp::body::content_length_limit(1024 * 32))
-        .and(warp::body::form())
-        .and(with_db(pool))
-        .and_then(register_fn);
-
-    register.or(do_register)
+    app.at("register").post(|req| async { register_fn(req).await });
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -51,48 +38,44 @@ fn password_valid(password: &str) -> bool {
     upper_case && number
 }
 
-async fn register_fn(register: Register, pool: Arc<MySqlPool>) -> Result<impl Reply, Rejection> {
-    let row = warp_unwrap!(
-        sqlx::query("SELECT * FROM users WHERE username = ? OR email = ?")
-            .bind(&register.username)
-            .bind(&register.email)
-            .fetch_optional(pool.as_ref())
-            .await
-    );
+async fn register_fn(mut request: Request<State>) -> tide::Result {
+    let state = request.state().clone();
+    let pool = state.pool.as_ref();
+    let register: Register = request.body_form().await?;
+    let row = sqlx::query("SELECT * FROM users WHERE username = ? OR email = ?")
+        .bind(&register.username)
+        .bind(&register.email)
+        .fetch_optional(pool)
+        .await?;
 
     if !email_valid(&register.email) {
-        return Err(warp::reject::custom(InvalidEmail));
+        return Err(tide::Error::from_str(400, "E-mail is not valid!"));
     }
 
     if !username_valid(&register.username) {
-        return Err(warp::reject::custom(InvalidUsername));
+        return Err(tide::Error::from_str(400, "Username is not valid!"));
     }
 
     if row.is_some() {
-        return Err(warp::reject::custom(ExistingUser));
+        return Err(tide::Error::from_str(400, "User already exists!"));
     }
 
     if !password_valid(&register.password) {
-        return Err(warp::reject::custom(InvalidPassword));
+        return Err(tide::Error::from_str(400, "Password is not valid!"));
     }
 
     if register.password != register.password2 {
-        return Err(warp::reject::custom(IncorrectPassword));
+        return Err(tide::Error::from_str(400, "Passwords do not match!"));
     }
 
-    let hash = match bcrypt::hash(&register.password, 11) {
-        Ok(h) => h,
-        _ => return Err(warp::reject::custom(HashError)),
-    };
+    let hash = bcrypt::hash(&register.password, 11)?;
 
-    warp_unwrap!(
-        sqlx::query("INSERT INTO users (username, password, email) VALUES (?, ?, ?)")
-            .bind(&register.username)
-            .bind(hash)
-            .bind(&register.email)
-            .execute(pool.as_ref())
-            .await
-    );
+    sqlx::query("INSERT INTO users (username, password, email) VALUES (?, ?, ?)")
+        .bind(&register.username)
+        .bind(hash)
+        .bind(&register.email)
+        .execute(pool)
+        .await?;
 
-    Ok(warp::redirect(Uri::from_static("/")))
+    Ok(Redirect::new("/").into())
 }
