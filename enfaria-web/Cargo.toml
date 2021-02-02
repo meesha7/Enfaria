@@ -10,7 +10,6 @@ async-std = { version = "1.9", features = ["attributes"]}
 tide = "0.16"
 tera = "1.5"
 serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
 uuid = { version = "0.8", features = ["v4"] }
 bcrypt = "0.9"
 dotenv = "0.15"

@@ -22,10 +22,10 @@ impl Template {
         let rendered = tera
             .render(self.name, &self.value)
             .unwrap_or_else(|err| err.to_string());
-        let mut body = Body::from_string(rendered);
-        body.set_mime("text/html;charset=utf-8");
-        let mut response = Response::new(200);
-        response.set_body(body);
-        response
+
+        Response::builder(200)
+            .body(rendered)
+            .content_type(tide::http::mime::HTML)
+            .build()
     }
 }

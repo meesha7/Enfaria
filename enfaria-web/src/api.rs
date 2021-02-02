@@ -37,5 +37,8 @@ async fn login_fn(mut req: Request<State>) -> tide::Result {
 
     let session_id: String = query.try_get(0)?;
 
-    Ok(json!(session_id).into())
+    Ok(Response::builder(200)
+        .content_type(tide::http::mime::JSON)
+        .body(session_id)
+        .build())
 }
