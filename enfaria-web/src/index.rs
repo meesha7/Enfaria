@@ -28,7 +28,7 @@ async fn auth_index_fn(request: Request<State>, cookie: &str, mut template: Temp
         .await?;
 
     if row.is_none() {
-        let mut response: Response = template.render(tera).into();
+        let mut response: Response = template.render(tera);
         response.insert_header("Set-Cookie", remove_cookie.to_string());
         return Ok(response);
     }
@@ -41,7 +41,7 @@ async fn auth_index_fn(request: Request<State>, cookie: &str, mut template: Temp
             .bind(&cookie)
             .execute(pool)
             .await?;
-        let mut response: Response = template.render(tera).into();
+        let mut response: Response = template.render(tera);
         response.insert_header("Set-Cookie", remove_cookie.to_string());
         return Ok(response);
     }

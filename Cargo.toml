@@ -3,5 +3,6 @@
 members = [
     "enfaria-common",
     "enfaria-server",
+    "enfaria-updater",
     "enfaria-web"
 ]

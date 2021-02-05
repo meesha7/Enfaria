@@ -1,0 +1,10 @@
+[package]
+name = "enfaria-updater"
+version = "0.1.0"
+authors = ["Elinvynia <59487684+Elinvynia@users.noreply.github.com>"]
+edition = "2018"
+
+[dependencies]
+druid = "0.7"
+ureq = "2.0"
+dotenv = "0.15"

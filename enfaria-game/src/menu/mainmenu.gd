@@ -7,6 +7,12 @@ onready var path = get_node("/root/constants").config_path
 var config = ConfigFile.new()
 
 func _ready():
+    var args = OS.get_cmdline_args()
+    if len(args) > 0:
+        if args[0] == "--v":
+            print(get_node("/root/env").get("VERSION"))
+        get_tree().quit()
+
     load_config()
 
     var _x = get_node("Container/ButtonContainer/Buttons/Play").connect("pressed", self, "_on_play_pressed")
@@ -19,7 +25,7 @@ func _ready():
 func _on_play_pressed():
     get_node("Container/FieldContainer/Fields/Error").text = "Connecting..."
     get_node("Container/ButtonContainer/Buttons/GetServer").timeout = 4
-    get_node("Container/ButtonContainer/Buttons/GetServer").request(url + "/api/getserver", [], true, HTTPClient.METHOD_GET, "")
+    get_node("Container/ButtonContainer/Buttons/GetServer").request(url + "/api/server", [], true, HTTPClient.METHOD_GET, "")
 
 
 func _on_getserver_completed(_result, response_code, _headers, body):

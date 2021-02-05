@@ -6,6 +6,7 @@ pub mod login;
 pub mod logout;
 pub mod prelude;
 pub mod register;
+pub mod release;
 pub mod template;
 
 #[derive(Clone)]
@@ -37,6 +38,7 @@ async fn main() -> tide::Result<()> {
     login::routes(&mut app);
     logout::routes(&mut app);
     register::routes(&mut app);
+    release::routes(&mut app);
 
     app.listen("0.0.0.0:8000").await?;
     Ok(())

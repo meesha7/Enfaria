@@ -4,8 +4,19 @@ pub fn routes(app: &mut Server<State>) {
     app.at("api/login")
         .post(|req: Request<State>| async { login_fn(req).await });
 
-    app.at("api/getserver")
-        .get(|mut _req| async { Ok(env::var("SERVER").unwrap()) });
+    app.at("api/server").get(|_| async {
+        Ok(Response::builder(200)
+            .content_type(tide::http::mime::JSON)
+            .body(env::var("SERVER").unwrap())
+            .build())
+    });
+
+    app.at("api/version").get(|_| async {
+        Ok(Response::builder(200)
+            .content_type(tide::http::mime::JSON)
+            .body(env::var("VERSION").unwrap())
+            .build())
+    });
 }
 
 #[derive(Debug, Deserialize)]
