@@ -2,11 +2,12 @@
 
 Enfaria is a work-in-progress multiplayer game inspired by Stardew Valley. It is currently in a very early phase of development and as such, any information put here would quickly become obsolete.
 
-### Running the game
+### Running the project
 
-For now, there is no script to set up and run everything.
-
-You will need `enfaria-web` and `enfaria-server` running at the same time. Then you can run the game by opening the project in Godot and pressing F5.
+Run `scripts/release.sh`.
+Run `release/web/enfaria-web(.exe)`
+Run `release/server/enfaria-server(.exe)`
+Open the game directly (`release/enfaria-game(.exe)`) or via updater (`release/enfaria-updater.exe`)
 
 ## Contributing
 
