@@ -98,11 +98,8 @@ func handle_switch(switch):
     if switch == selected:
         return
 
-    var previous = hotbar.get_child(selected - 1).find_node("Selected", true, false)
-    previous.visible = false
-
-    var new = hotbar.get_child(switch - 1).find_node("Selected", true, false)
-    new.visible = true
+    hotbar.get_child(selected - 1).unselect()
+    hotbar.get_child(switch - 1).select()
 
     selected = switch
 

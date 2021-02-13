@@ -2,30 +2,32 @@ extends Control
 
 onready var tree = get_tree()
 onready var url = get_node("/root/env").get("DOMAIN")
-onready var networking = get_node("/root/env").get("NETWORKING")
 onready var path = get_node("/root/constants").config_path
 var config = ConfigFile.new()
 
-func _ready():
-    var args = OS.get_cmdline_args()
-    if len(args) > 0:
-        if args[0] == "--v":
-            print(get_node("/root/env").get("VERSION"))
-        get_tree().quit()
+onready var play = get_node("Container/ButtonContainer/Buttons/Play")
+onready var options = get_node("Container/ButtonContainer/Buttons/Options")
+onready var quit = get_node("Container/ButtonContainer/Buttons/Quit")
+onready var login = get_node("Container/ButtonContainer/Buttons/Login")
+onready var username = get_node("Container/FieldContainer/Fields/Username")
+onready var password = get_node("Container/FieldContainer/Fields/Password")
+onready var error = get_node("Container/FieldContainer/Fields/Error")
+onready var getserver = get_node("Container/ButtonContainer/Buttons/GetServer")
 
+func _ready():
     load_config()
 
-    var _x = get_node("Container/ButtonContainer/Buttons/Play").connect("pressed", self, "_on_play_pressed")
-    var _y = get_node("Container/ButtonContainer/Buttons/Options").connect("pressed", self, "_on_option_pressed")
-    var _z = get_node("Container/ButtonContainer/Buttons/Quit").connect("pressed", self, "_on_quit_pressed")
-    var _a = get_node("Container/ButtonContainer/Buttons/Login").connect("request_completed", self, "_on_login_completed")
-    var _b = get_node("Container/ButtonContainer/Buttons/GetServer").connect("request_completed", self, "_on_getserver_completed")
+    play.connect("pressed", self, "_on_play_pressed")
+    options.connect("pressed", self, "_on_option_pressed")
+    quit.connect("pressed", self, "_on_quit_pressed")
+    login.connect("request_completed", self, "_on_login_completed")
+    getserver.connect("request_completed", self, "_on_getserver_completed")
 
 
 func _on_play_pressed():
-    get_node("Container/FieldContainer/Fields/Error").text = "Connecting..."
-    get_node("Container/ButtonContainer/Buttons/GetServer").timeout = 4
-    get_node("Container/ButtonContainer/Buttons/GetServer").request(url + "/api/server", [], true, HTTPClient.METHOD_GET, "")
+    error.text = "Connecting..."
+    getserver.timeout = 4
+    getserver.request(url + "/api/server", [], true, HTTPClient.METHOD_GET, "")
 
 
 func _on_getserver_completed(_result, response_code, _headers, body):
@@ -34,18 +36,15 @@ func _on_getserver_completed(_result, response_code, _headers, body):
         get_node("/root/connection").server_ip = response[0]
         get_node("/root/connection").server_port = int(response[1])
 
-        var username = get_node("Container/FieldContainer/Fields/Username").text
-        var password = get_node("Container/FieldContainer/Fields/Password").text
-
-        if username == "" or password == "":
+        if username.text == "" or password.text == "":
             return
 
-        var payload = "username" + "=" + username + "&" + "password" + "=" + password
+        var payload = "username" + "=" + username.text + "&" + "password" + "=" + password.text
 
-        get_node("Container/ButtonContainer/Buttons/Login").timeout = 4
-        get_node("Container/ButtonContainer/Buttons/Login").request(url + "/api/login", [], true, HTTPClient.METHOD_POST, payload)
+        login.timeout = 4
+        login.request(url + "/api/login", [], true, HTTPClient.METHOD_POST, payload)
     else:
-        get_node("Container/FieldContainer/Fields/Error").text = "Failed to connect."
+        error.text = "Server is down."
 
 
 func _on_login_completed(_result, response_code, _headers, body):
@@ -53,7 +52,7 @@ func _on_login_completed(_result, response_code, _headers, body):
         get_node("/root/connection").session_id = body.get_string_from_utf8().replace("\"", "")
         if get_node("/root/connection").join():
             tree.change_scene("res://src/game.tscn")
-    get_node("Container/FieldContainer/Fields/Error").text = "Failed to connect."
+    error.text = "Login failed."
 
 
 func _on_option_pressed():

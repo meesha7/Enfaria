@@ -8,6 +8,7 @@ func hide_chat():
     visible = false
     clear()
 
+
 func show_chat():
     visible = true
     line.call_deferred("grab_focus")
@@ -27,12 +28,13 @@ func add_message(msg):
 
 
 func send_message(msg):
-    get_node("/root/connection").generate_packet(Dictionary({"ChatSend":msg}))
+    get_node("/root/connection").c_chat(msg)
 
 
 func _input(event):
     if !(event is InputEventKey):
         return
+
     if !event.is_pressed():
         return
 

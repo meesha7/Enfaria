@@ -106,3 +106,7 @@ func c_move(pos):
 
 func c_move_item(from, to):
     generate_packet(Dictionary({"MoveItem":[from, to]}))
+
+
+func c_chat(msg):
+    generate_packet(Dictionary({"ChatSend":msg}))

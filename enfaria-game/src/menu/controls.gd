@@ -1,14 +1,16 @@
 extends VBoxContainer
 
+onready var back = get_node("ControlButtons/Back")
+onready var save = get_node("ControlButtons/Save")
 onready var path = get_node("/root/constants").config_path
 var config = ConfigFile.new()
 var actions = ["Up", "Down", "Left", "Right"]
-
 var listening = false
 
 func _ready():
-    get_node("ControlButtons/Back").connect("pressed", self, "_on_back_pressed")
-    get_node("ControlButtons/Save").connect("pressed", self, "_on_save_pressed")
+    back.connect("pressed", self, "_on_back_pressed")
+    save.connect("pressed", self, "_on_save_pressed")
+
     for x in get_children():
         if !(x.name in actions):
             continue
@@ -22,9 +24,11 @@ func _ready():
                 if x == y.name:
                     y.get_node(y.name + "Button").text = config.get_value("Controls", x)
 
+
 func _input(event):
     if !listening:
         return
+
     if !(event is InputEventKey):
         return
 
@@ -47,8 +51,10 @@ func _input(event):
 
         break
 
+
 func _on_back_pressed():
     get_tree().change_scene("res://src/menu/options.tscn")
+
 
 func _on_save_pressed():
     for x in get_children():
@@ -60,11 +66,13 @@ func _on_save_pressed():
 
     config.save(path)
 
-func _on_control_pressed(pressed):
+
+func _on_control_pressed():
     if listening:
         return
     listening = true
     toggle_rest()
+
 
 func toggle_rest():
     for x in get_children():

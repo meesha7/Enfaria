@@ -31,17 +31,9 @@ func _ready():
     add_to_group("tile")
 
 
-func serialize():
-    var properties = []
-
-    properties.append("type")
-    properties.append(get_class())
-
-    properties.append("name")
-    properties.append(name)
-
-    return properties
+func sprite():
+    find_node("Sprite")
 
 
-func deserialize():
-    return
+func shape():
+    find_node("Shape")

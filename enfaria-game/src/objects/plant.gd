@@ -23,15 +23,3 @@ func grow():
     stage += 1
     var new_sprite = base_path + "_" + str(stage) + ext
     find_node("Sprite", true, true).texture = load(new_sprite)
-
-
-func serialize():
-    var properties = .serialize()
-
-    properties.append("stage")
-    properties.append(stage)
-
-    properties.append("water")
-    properties.append(water)
-
-    return properties

@@ -18,6 +18,7 @@ func _on_timeout():
 func _input(event):
     if !(event is InputEventKey):
         return
+
     if !event.is_pressed():
         return
 

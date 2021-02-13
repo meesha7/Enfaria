@@ -20,17 +20,5 @@ func _ready():
     add_to_group("object")
 
 
-func serialize():
-    var properties = []
-
-    properties.append("type")
-    properties.append(get_class())
-
-    properties.append("name")
-    properties.append(name)
-
-    return properties
-
-
-func deserialize(_properties):
-    return
+func get_sprite():
+    find_node("Sprite")
