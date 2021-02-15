@@ -56,7 +56,7 @@ func send_packets():
 
 
 func join():
-    var result = connection.connect_to_host(server_ip, server_port)
+    var result = connection.set_dest_address(server_ip, server_port)
     if result != OK:
         return false
 

@@ -65,7 +65,6 @@ func _process(_delta):
 
             var tile = ct.instance()
             tile.position = Vector2(position.get("x"), position.get("y"))
-            tile.deserialize()
 
             for objdata in tiledata.get("contains"):
                 var objname = objdata.get("name")

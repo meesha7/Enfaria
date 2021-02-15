@@ -9,7 +9,7 @@
 config_version=4
 
 _global_script_classes=[ {
-"base": "StaticBody2D",
+"base": "Node2D",
 "class": "Blocker",
 "language": "GDScript",
 "path": "res://src/tiles/blocker.gd"
