@@ -48,24 +48,25 @@ async fn register_fn(mut request: Request<State>) -> tide::Result {
         .fetch_optional(pool)
         .await?;
 
+    let template = "register.tera";
     if !email_valid(&register.email) {
-        return Err(tide::Error::from_str(400, "E-mail is not valid!"));
+        return Err(error(template, "E-mail is not valid!"));
     }
 
     if !username_valid(&register.username) {
-        return Err(tide::Error::from_str(400, "Username is not valid!"));
+        return Err(error(template, "Username is not valid!"));
     }
 
     if row.is_some() {
-        return Err(tide::Error::from_str(400, "User already exists!"));
+        return Err(error(template, "User already exists!"));
     }
 
     if !password_valid(&register.password) {
-        return Err(tide::Error::from_str(400, "Password is not valid!"));
+        return Err(error(template, "Password is not valid!"));
     }
 
     if register.password != register.password2 {
-        return Err(tide::Error::from_str(400, "Passwords do not match!"));
+        return Err(error(template, "Passwords do not match!"));
     }
 
     let hash = bcrypt::hash(&register.password, 11)?;

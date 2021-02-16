@@ -1,3 +1,4 @@
+pub use crate::error::error;
 pub use crate::{template::Template, State};
 pub use chrono::{prelude::*, Duration};
 pub use cookie::Cookie;

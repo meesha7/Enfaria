@@ -1,6 +1,8 @@
 use crate::prelude::*;
+use tide::utils::After;
 
 pub mod api;
+pub mod error;
 pub mod index;
 pub mod login;
 pub mod logout;
@@ -39,6 +41,8 @@ async fn main() -> tide::Result<()> {
     logout::routes(&mut app);
     register::routes(&mut app);
     release::routes(&mut app);
+
+    app.with(After(|res: Response| async move { error::handle_error(res).await }));
 
     app.listen("0.0.0.0:8000").await?;
     Ok(())

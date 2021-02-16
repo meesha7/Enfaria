@@ -6,8 +6,7 @@
     <div class="column"></div>
     <div class="column is-3">
         {% if error %}
-            <h1 class="title">{{ title }}</h1>
-            <p class="subtitle">{{ message }}</p>
+            <p class="subtitle">{{ error }}</p>
         {% endif %}
         <form action="/register" method="post">
         <div class="field">

@@ -11,8 +11,7 @@
 {% if error %}
 <section class="section">
     <div class="container">
-        <h1 class="title">{{ title }}</h1>
-        <p class="subtitle">{{ message }}</p>
+        <p class="subtitle">{{ error }}</p>
     </div>
 </section>
 {% endif %}
