@@ -42,11 +42,13 @@ async fn register_fn(mut request: Request<State>) -> tide::Result {
     let state = request.state().clone();
     let pool = state.pool.as_ref();
     let register: Register = request.body_form().await?;
-    let row = sqlx::query("SELECT * FROM users WHERE username = ? OR email = ?")
-        .bind(&register.username)
-        .bind(&register.email)
-        .fetch_optional(pool)
-        .await?;
+    let response = sqlx::query!(
+        "SELECT * FROM users WHERE username = ? OR email = ?",
+        &register.username,
+        &register.email
+    )
+    .fetch_optional(pool)
+    .await?;
 
     let template = "register.tera";
     if !email_valid(&register.email) {
@@ -57,7 +59,7 @@ async fn register_fn(mut request: Request<State>) -> tide::Result {
         return Err(error(template, "Username is not valid!"));
     }
 
-    if row.is_some() {
+    if response.is_some() {
         return Err(error(template, "User already exists!"));
     }
 
@@ -71,12 +73,14 @@ async fn register_fn(mut request: Request<State>) -> tide::Result {
 
     let hash = bcrypt::hash(&register.password, 11)?;
 
-    sqlx::query("INSERT INTO users (username, password, email) VALUES (?, ?, ?)")
-        .bind(&register.username)
-        .bind(hash)
-        .bind(&register.email)
-        .execute(pool)
-        .await?;
+    sqlx::query!(
+        "INSERT INTO users (username, password, email) VALUES (?, ?, ?)",
+        &register.username,
+        hash,
+        &register.email
+    )
+    .execute(pool)
+    .await?;
 
     Ok(Redirect::new("/").into())
 }

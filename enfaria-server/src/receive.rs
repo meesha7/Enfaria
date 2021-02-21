@@ -1,166 +1,75 @@
 use crate::prelude::*;
-use async_std::{net::UdpSocket, task};
-use enfaria_common::map::get_map;
+use async_std::io::*;
+use async_std::net::{TcpListener, TcpStream};
+use async_std::task::block_on;
 use parking_lot::RwLock;
-use sqlx::{mysql::MySqlPool, Row};
-use std::{net::SocketAddr, path::Path, sync::Arc};
+use sqlx::mysql::MySqlPool;
+use std::sync::Arc;
 
-pub fn receive_data(server: Arc<RwLock<ServerData>>, socket: Arc<UdpSocket>, pool: Arc<MySqlPool>) {
-    task::block_on(async move {
+pub fn accept_connections(server: Arc<RwLock<ServerData>>, listener: TcpListener, pool: Arc<MySqlPool>) {
+    block_on(async move {
         loop {
-            let mut buf = [0; 10000];
-            let (amt, ip) = urcontinue!(socket.recv_from(&mut buf).await);
-            if amt == 0 {
-                info!("Received no data from {:?}", &ip);
-                continue;
-            }
-            let packet: Packet = urcontinue!(bincode::deserialize(&buf));
-            let mut s = server.write();
-            info!("Receiving: {:?}", &packet);
-            match packet.command {
-                Command::Connect => {
-                    connect_player(&mut s, ip, &packet, pool.as_ref()).await;
+            // Listen for connections
+            let (mut stream, ip) = match listener.accept().await {
+                Ok(v) => v,
+                Err(e) => {
+                    info!("Failed to accept incoming connection: {:?}", e);
+                    continue;
                 }
-                Command::Ping => ping_user(&mut s, ip),
-                _ => {
-                    receive_packet(&mut s, ip, packet.clone());
+            };
+
+            let mut buf = vec![0u8; 1024];
+            match stream.read(&mut buf).await {
+                Ok(_) => {}
+                Err(e) => {
+                    info!("Failed to receive incoming packet {:?}", e);
+                    continue;
                 }
-            }
+            };
+
+            let packet: Packet = match bincode::deserialize(&buf[..]) {
+                Ok(p) => p,
+                Err(e) => {
+                    info!("Failed to deserialize incoming packet: {:?}", e);
+                    continue;
+                }
+            };
+
+            match add_user(stream, ip, packet, pool.as_ref()).await {
+                Some(user) => {
+                    info!("Added user {:?}", &user);
+                    let mut s = server.write();
+                    s.users.push(user)
+                }
+                None => continue,
+            };
         }
     });
 }
 
-pub async fn connect_player(server: &mut ServerData, ip: SocketAddr, packet: &Packet, pool: &MySqlPool) {
-    if server.user_by_ip(ip).is_some() {
-        return;
+pub async fn add_user(stream: TcpStream, ip: SocketAddr, packet: Packet, pool: &MySqlPool) -> Option<User> {
+    if packet.message != Message::Connect {
+        info!("Received invalid first command");
+        return None;
     }
+    let record = sqlx::query!(
+        "SELECT username FROM users WHERE id = (SELECT user_id FROM sessions WHERE secret = ?)",
+        &packet.session_id
+    )
+    .fetch_one(pool)
+    .await;
 
-    let row = match sqlx::query("SELECT CAST(user_id as UNSIGNED) FROM sessions WHERE secret = ?")
-        .bind(&packet.session_id)
-        .fetch_one(pool)
-        .await
-    {
+    let record = match record {
         Ok(r) => r,
-        Err(_) => return,
-    };
-
-    let user_id: u64 = row.get(0);
-
-    let row = match sqlx::query("SELECT username FROM users WHERE id = ?")
-        .bind(&user_id)
-        .fetch_one(pool)
-        .await
-    {
-        Ok(r) => r,
-        Err(_) => return,
-    };
-
-    let username: String = row.get(0);
-
-    let mut pid = PLAYER_ID.write();
-    let id = UserId(*pid);
-
-    *pid += 1;
-
-    let map;
-
-    if Path::new(&format!("data/{}/map", username)).exists() {
-        map = match get_map(&format!("data/{}/map", username)) {
-            Ok(m) => m,
-            Err(_) => get_map("templates/farm.json").expect("Default map template not found."),
-        };
-    } else {
-        map = get_map("templates/farm.json").expect("Default map template not found.");
-    }
-
-    let player;
-
-    if Path::new(&format!("data/{}/player", username)).exists() {
-        player = match get_player(&format!("data/{}/player", username)) {
-            Ok(p) => p,
-            Err(_) => get_player("templates/player.json").expect("Default player template not found."),
-        };
-    } else {
-        player = get_player("templates/player.json").expect("Default player template not found.");
-    }
-
-    info!("Player added: {:?}", &username);
-
-    let user = User::new(id, ip, username, packet.session_id.clone(), map, player);
-    server.users.push(user);
-
-    send_map(server, id);
-    send_player(server, id);
-}
-
-pub fn send_map(server: &mut ServerData, id: UserId) {
-    let user = match server.user_by_id(id) {
-        Some(u) => u,
-        None => return,
-    };
-    let ip = user.ip;
-    let token = user.token.clone();
-    let map = user.map.clone();
-
-    let mut pos_x = 0;
-    let mut pos_y = 0;
-    for row in map.tiles {
-        for tile in row {
-            let packet = Packet {
-                beat: 0,
-                command: Command::CreateTile((
-                    Position {
-                        x: pos_x,
-                        y: pos_y,
-                        z: id.0,
-                    },
-                    tile,
-                )),
-                destination: ip,
-                session_id: token.clone(),
-            };
-            send_packet(server, ip, packet);
-            pos_x += 32
+        Err(e) => {
+            info!("Database error: {:?}", e);
+            return None;
         }
-        pos_x = 0;
-        pos_y += 32;
-    }
-}
-
-pub fn send_player(server: &mut ServerData, id: UserId) {
-    let user = match server.user_by_id_mut(id) {
-        Some(u) => u,
-        None => return,
-    };
-    let ip = user.ip;
-    let token = user.token.clone();
-    let player = user.player.clone();
-    let username = user.username.clone();
-
-    let packet = Packet {
-        beat: 0,
-        command: Command::CreatePlayer((player.position, username)),
-        destination: ip,
-        session_id: token.clone(),
     };
 
-    user.send_packet(packet);
+    let mut lock = USER_ID.lock();
+    let id = *lock;
+    *lock += 1;
 
-    for (slot, item) in player.inventory.into_iter() {
-        let packet = Packet {
-            beat: 0,
-            command: Command::CreateItem((slot, item)),
-            destination: ip,
-            session_id: token.clone(),
-        };
-        user.send_packet(packet);
-    }
-}
-
-pub fn ping_user(server: &mut ServerData, ip: SocketAddr) {
-    let user = match server.user_by_ip_mut(ip) {
-        Some(u) => u,
-        None => return,
-    };
-    user.time = get_timestamp();
+    Some(User::new(UserId(id), ip, stream, record.username, packet.session_id))
 }

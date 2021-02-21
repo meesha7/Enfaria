@@ -1,0 +1,19 @@
+[package]
+name = "enfaria-game"
+version = "0.1.0"
+authors = ["Elinvynia <59487684+Elinvynia@users.noreply.github.com>"]
+edition = "2018"
+
+[dependencies]
+ggez = "0.6.0-rc1"
+hecs = "0.3"
+egui = "0.9"
+enfaria-common = { path = "../enfaria-common" }
+
+# Config
+config = "0.10"
+dotenv = "0.15"
+
+# Logging
+log = "0.4"
+env_logger = "0.8"

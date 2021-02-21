@@ -1,4 +1,7 @@
 use crate::prelude::*;
+use cookie::Cookie;
+use std::env;
+use time::OffsetDateTime;
 
 pub fn routes(app: &mut Server<State>) {
     app.at("logout").get(|req: Request<State>| async {
@@ -13,8 +16,7 @@ pub fn routes(app: &mut Server<State>) {
 async fn logout_fn(request: Request<State>, cookie: &str) -> tide::Result {
     let state = request.state().clone();
     let pool = state.pool.as_ref();
-    sqlx::query("DELETE FROM sessions WHERE secret = ?")
-        .bind(&cookie)
+    sqlx::query!("DELETE FROM sessions WHERE secret = ?", &cookie)
         .execute(pool)
         .await?;
 

@@ -1,0 +1,28 @@
+{
+  "db": "MySQL",
+  "49cb96f1b4d7e73e3f9117088cdddf938255660972712824a1aea8a06e61fd54": {
+    "query": "SELECT username FROM users WHERE id = (SELECT user_id FROM sessions WHERE secret = ?)",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "username",
+          "type_info": {
+            "type": "VarString",
+            "flags": {
+              "bits": 4097
+            },
+            "char_set": 224,
+            "max_size": 200
+          }
+        }
+      ],
+      "parameters": {
+        "Right": 1
+      },
+      "nullable": [
+        false
+      ]
+    }
+  }
+}

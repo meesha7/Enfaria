@@ -1,4 +1,7 @@
 use crate::prelude::*;
+use sqlx::mysql::{MySqlPool, MySqlPoolOptions};
+use std::env;
+use std::sync::Arc;
 use tide::utils::After;
 
 pub mod api;
@@ -8,7 +11,6 @@ pub mod login;
 pub mod logout;
 pub mod prelude;
 pub mod register;
-pub mod release;
 pub mod template;
 
 #[derive(Clone)]
@@ -19,15 +21,16 @@ pub struct State {
 
 #[async_std::main]
 async fn main() -> tide::Result<()> {
-    dotenv::dotenv().ok();
+    dotenv::dotenv().expect("Failed to setup dotenv.");
+    env_logger::init();
 
     let tera = Arc::new(Tera::new("templates/*").unwrap());
     let pool = Arc::new(
         MySqlPoolOptions::new()
             .max_connections(5)
-            .connect(&env::var("DATABASE_URL").unwrap())
+            .connect(&env::var("DATABASE").unwrap())
             .await
-            .unwrap(),
+            .expect("Failed to connect to database."),
     );
 
     let state = State { tera, pool };
@@ -40,7 +43,6 @@ async fn main() -> tide::Result<()> {
     login::routes(&mut app);
     logout::routes(&mut app);
     register::routes(&mut app);
-    release::routes(&mut app);
 
     app.with(After(|res: Response| async move { error::handle_error(res).await }));
 

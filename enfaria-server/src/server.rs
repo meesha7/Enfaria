@@ -1,5 +1,6 @@
 use crate::prelude::*;
-use async_std::{net::UdpSocket, task};
+use async_std::io::prelude::*;
+use async_std::task;
 use parking_lot::RwLock;
 use sqlx::mysql::MySqlPool;
 use std::{
@@ -8,49 +9,53 @@ use std::{
     time::{Duration, Instant},
 };
 
-pub mod chat;
-pub mod move_items;
-pub mod move_players;
-pub mod ping;
-pub mod quit;
-pub mod send_data;
-pub mod sort_data;
-
-pub fn server_loop(server: Arc<RwLock<ServerData>>, socket: Arc<UdpSocket>, _pool: Arc<MySqlPool>) {
+pub fn tick(server: Arc<RwLock<ServerData>>, _pool: Arc<MySqlPool>) {
     task::block_on(async move {
         loop {
             let now = Instant::now();
+            let mut s = server.write();
 
-            let users;
-
-            {
-                let mut s = server.write();
-                sort_data::sort_data(&mut s);
-
-                // processing goes here
-
-                move_players::move_players(&mut s);
-                move_items::move_items(&mut s);
-                chat::chat(&mut s);
-
-                // end of processing
-
-                if s.beat % 40 == 0 {
-                    ping::ping(&mut s);
-                }
-                quit::quit(&mut s);
-
-                users = s.users.clone();
-                s.beat += 1;
-                for mut user in s.users.iter_mut() {
-                    user.send_queue = vec![]
-                }
+            // Receive packets
+            for user in s.users.iter_mut() {
+                receive_packets(user).await;
             }
 
-            send_data::send_data(users, socket.clone()).await;
+            // PROCESSING START
+            if !s.users.is_empty() {
+                info!("Current users: {:?}", &s.users);
+            }
+            // PROCESSING END
 
+            // Send packets
+            for user in s.users.iter_mut() {
+                send_packets(user).await;
+            }
+
+            drop(s);
             let delta = TICKRATE - now.elapsed().as_millis() as u64;
             sleep(Duration::from_millis(delta));
         }
     });
+}
+
+pub async fn receive_packets(user: &mut User) {
+    let stream = &mut user.stream;
+    let mut buffer = vec![0u8; 1024];
+
+    while let Ok(v) = stream.read(&mut buffer).await {
+        if v == 0 {
+            return;
+        };
+
+        buffer = vec![0u8; 1024];
+    }
+}
+
+pub async fn send_packets(user: &mut User) {
+    let stream = &mut user.stream;
+
+    for packet in user.send_queue.drain(..) {
+        let serialized = urcontinue!(bincode::serialize(&packet));
+        urcontinue!(stream.write(&serialized[..]).await);
+    }
 }

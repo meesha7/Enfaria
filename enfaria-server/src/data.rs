@@ -1,12 +1,21 @@
 use crate::prelude::*;
+use async_std::net::TcpStream;
 
-#[derive(Debug, Default)]
+#[derive(Default)]
 pub struct ServerData {
     pub beat: u64,
     pub users: Vec<User>,
+    pub state: State,
 }
 
 impl ServerData {
+    pub fn new() -> Self {
+        Self {
+            state: State::new(state::Mode::Server),
+            ..Default::default()
+        }
+    }
+
     pub fn user_by_id(&self, id: UserId) -> Option<&User> {
         self.users.iter().find(|u| u.id == id)
     }
@@ -27,43 +36,38 @@ impl ServerData {
 #[derive(Debug, PartialEq, Eq, Hash, Copy, Clone)]
 pub struct UserId(pub u64);
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct User {
     pub id: UserId,
     pub ip: SocketAddr,
+    pub stream: TcpStream,
     pub username: String,
     pub token: String,
     pub time: u128,
-    pub map: Map,
-    pub player: Player,
     pub send_queue: Vec<Packet>,
     pub receive_queue: Vec<Packet>,
 }
 
 impl User {
-    pub fn new(id: UserId, ip: SocketAddr, username: String, token: String, map: Map, player: Player) -> Self {
+    pub fn new(id: UserId, ip: SocketAddr, stream: TcpStream, username: String, token: String) -> Self {
         User {
             id,
             ip,
+            stream,
             username,
             token,
             time: get_timestamp(),
-            map,
-            player,
             send_queue: vec![],
             receive_queue: vec![],
         }
     }
 
-    pub fn send_packet(&mut self, packet: Packet) {
-        if self.token != packet.session_id {
-            info!("Invalid session ID {:?}", &self.username);
-            return;
-        };
-
-        if self.ip != packet.destination {
-            info!("Invalid destination {:?}", &self.username);
-            return;
+    pub fn queue_packet(&mut self, beat: u64, message: Message) {
+        let packet = Packet {
+            beat,
+            session_id: self.token.clone(),
+            destination: self.ip,
+            message,
         };
 
         self.send_queue.push(packet);

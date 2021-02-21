@@ -1,4 +1,8 @@
 use crate::prelude::*;
+use chrono::{NaiveDateTime, Utc};
+use cookie::Cookie;
+use std::env;
+use time::{Duration, OffsetDateTime};
 
 pub fn routes(app: &mut Server<State>) {
     app.at("/").get(|req: Request<State>| async {
@@ -17,28 +21,26 @@ async fn auth_index_fn(request: Request<State>, cookie: &str, mut template: Temp
     let pool = state.pool.as_ref();
     let domain = env::var("DOMAIN").unwrap();
     let remove_cookie = Cookie::build("session-id", "")
-        .expires(OffsetDateTime::now_utc() - TimeDuration::day())
+        .expires(OffsetDateTime::now_utc() - Duration::day())
         .path("/")
         .domain(domain)
         .finish();
 
-    let row = sqlx::query("SELECT user_id, expiry_date FROM sessions WHERE secret = ?")
-        .bind(&cookie)
+    let response = sqlx::query!("SELECT user_id, expiry_date FROM sessions WHERE secret = ?", &cookie)
         .fetch_optional(pool)
         .await?;
 
-    if row.is_none() {
+    if response.is_none() {
         let mut response: Response = template.render(tera);
         response.insert_header("Set-Cookie", remove_cookie.to_string());
         return Ok(response);
     }
 
-    let row = row.unwrap();
-    let date: DateTime<Utc> = row.try_get(1)?;
+    let response = response.unwrap();
+    let date: NaiveDateTime = response.expiry_date;
 
-    if Utc::now() > date {
-        sqlx::query("DELETE FROM sessions WHERE secret = ?")
-            .bind(&cookie)
+    if Utc::now().naive_utc() > date {
+        sqlx::query!("DELETE FROM sessions WHERE secret = ?", &cookie)
             .execute(pool)
             .await?;
         let mut response: Response = template.render(tera);

@@ -1,20 +1,8 @@
 # Rust
-*target
+*target/
 */Cargo.lock
-
-# Godot
-*/.import
-
-# Libs
-*.dll*
-*.so
-*.dylib
-*.pdb
-*.rlib
-.DS_Store
 
 # Ours
 enfaria-test/*
 enfaria-server/data/*
-*/config.cfg
 release/*

@@ -1,4 +1,8 @@
 use crate::prelude::*;
+use chrono::{Duration, Utc};
+use cookie::Cookie;
+use time::{NumericalDuration, OffsetDateTime};
+use uuid::Uuid;
 
 pub fn routes(app: &mut Server<State>) {
     app.at("login")
@@ -18,19 +22,16 @@ async fn login_fn(mut request: Request<State>) -> tide::Result {
     let state = request.state().clone();
     let pool = state.pool.as_ref();
     let login: LoginData = request.body_form().await?;
-    let query = sqlx::query("SELECT id, password FROM users WHERE username = ?")
-        .bind(login.username)
+    let response = sqlx::query!("SELECT id, password FROM users WHERE username = ?", login.username)
         .fetch_one(pool)
         .await?;
 
-    let db_password: Vec<u8> = query.try_get(1)?;
+    let db_password: Vec<u8> = response.password.into();
     let db_password: String = std::str::from_utf8(&db_password)?.to_string();
     bcrypt::verify(login.password, &db_password)?;
 
-    let id: i64 = query.try_get(0)?;
-
-    sqlx::query("DELETE FROM sessions WHERE user_id = ?")
-        .bind(id)
+    let id: i32 = response.id;
+    sqlx::query!("DELETE FROM sessions WHERE user_id = ?", id)
         .execute(pool)
         .await?;
 
@@ -38,18 +39,17 @@ async fn login_fn(mut request: Request<State>) -> tide::Result {
     let expiry_date = Utc::now() + Duration::days(30);
     let expiry_two = OffsetDateTime::now_utc() + 30_i32.days();
 
-    sqlx::query("INSERT INTO sessions (user_id, secret, expiry_date) VALUES (?, ?, ?)")
-        .bind(id)
-        .bind(session_id.to_string())
-        .bind(expiry_date.format("%F %T").to_string())
-        .execute(pool)
-        .await?;
+    sqlx::query!(
+        "INSERT INTO sessions (user_id, secret, expiry_date) VALUES (?, ?, ?)",
+        id,
+        session_id.to_string(),
+        expiry_date.format("%F %T").to_string()
+    )
+    .execute(pool)
+    .await?;
 
-    let domain = env::var("DOMAIN").unwrap();
     let cookie = Cookie::build("session-id", session_id.to_string())
         .expires(expiry_two)
-        .path("/")
-        .domain(domain)
         .finish();
 
     let mut response: Response = Redirect::new("/").into();

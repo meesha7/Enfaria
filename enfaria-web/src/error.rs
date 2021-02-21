@@ -33,5 +33,13 @@ pub async fn handle_error(response: Response) -> tide::Result<Response> {
         return Ok(template.render_new());
     }
 
+    if let Some(e) = response.error() {
+        error!("Internal Server Error: {:?}", e);
+        let mut context = Context::new();
+        context.insert("error", "Internal server error occured.");
+        let template = Template::with_context("index.tera", context);
+        return Ok(template.render_new());
+    }
+
     Ok(response)
 }

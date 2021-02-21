@@ -2,7 +2,7 @@
 
 members = [
     "enfaria-common",
+    "enfaria-game",
     "enfaria-server",
-    "enfaria-updater",
     "enfaria-web"
 ]

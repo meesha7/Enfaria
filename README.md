@@ -5,19 +5,18 @@ Enfaria is a work-in-progress multiplayer game inspired by Stardew Valley. It is
 ### Running the project
 
 Run `scripts/release.sh`.
+
 Run `release/web/enfaria-web(.exe)`
+
 Run `release/server/enfaria-server(.exe)`
-Open the game directly (`release/enfaria-game(.exe)`) or via updater (`release/enfaria-updater.exe`)
+
+Finally, run the game! (`release/enfaria-game(.exe)`)
 
 ## Contributing
 
-### Native files
+All contributions are welcome, a dedicated Discord will be made as soon as there are more people willing to contribute!
 
-Run `scripts/native.sh` or open it and run the command from inside of the file.
-
-Alternatively, compile `enfaria-common` and put the resulting .dll/.so file in `enfaria-game/src/native`.
-
-## DB
+### DB
 
 You need a MariaDB/MySQL database.
 
