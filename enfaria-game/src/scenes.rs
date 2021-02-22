@@ -1,95 +1,112 @@
+use crate::scenes::menu::MenuScene;
 use crate::world::GameWorld;
-use ggez::event::{KeyCode, KeyMods};
-use ggez::{Context, GameResult};
+use egui::CtxRef;
+use tetra::{Context, Event};
 
-pub mod game;
 pub mod menu;
 
+// Holds the stack of scenes and takes care of actual logic.
 pub struct SceneStack {
-    pub world: GameWorld,
-    scenes: Vec<Box<dyn Scene>>,
+    world: GameWorld,
+    scenes: Vec<Scenes>,
 }
 
 impl SceneStack {
-    pub fn new(world: GameWorld) -> Self {
+    pub fn new(world: GameWorld, initial: Scenes) -> Self {
         Self {
             world,
-            scenes: Vec::new(),
+            scenes: vec![initial],
         }
     }
 
-    pub fn push(&mut self, scene: Box<dyn Scene>) {
+    fn push(&mut self, scene: Scenes) {
         self.scenes.push(scene)
     }
 
-    pub fn pop(&mut self) -> Box<dyn Scene> {
+    fn pop(&mut self) -> Scenes {
         self.scenes.pop().expect("Tried to pop an empty scene stack.")
     }
 
-    pub fn switch(&mut self, next_scene: SceneSwitch) -> Option<Box<dyn Scene>> {
-        match next_scene {
-            SceneSwitch::None => None,
-            SceneSwitch::Pop => {
-                let s = self.pop();
-                Some(s)
-            }
-            SceneSwitch::Push(s) => {
-                self.push(s);
-                None
-            }
-            SceneSwitch::Replace(s) => {
-                let old_scene = self.pop();
-                self.push(s);
-                Some(old_scene)
-            }
-        }
-    }
-
-    fn draw_scenes(scenes: &mut [Box<dyn Scene>], world: &mut GameWorld, ctx: &mut Context) {
+    // Recursively pass through all scenes that allow drawing previous.
+    // Then draw them in order from oldest to newest.
+    fn draw_scenes(scenes: &mut [Scenes], world: &mut GameWorld, ctx: &mut Context, ectx: &mut CtxRef) {
         assert!(!scenes.is_empty());
         if let Some((current, rest)) = scenes.split_last_mut() {
             if current.draw_previous() {
-                SceneStack::draw_scenes(rest, world, ctx);
+                SceneStack::draw_scenes(rest, world, ctx, ectx);
             }
-            current.draw(world, ctx).expect("Failed to draw a scene.");
+            current.draw(world, ctx, ectx).expect("Failed to draw a scene.");
         }
     }
 
-    pub fn draw(&mut self, ctx: &mut ggez::Context) {
-        SceneStack::draw_scenes(&mut self.scenes, &mut self.world, ctx)
+    pub fn draw(&mut self, ctx: &mut Context, ectx: &mut CtxRef) {
+        SceneStack::draw_scenes(&mut self.scenes, &mut self.world, ctx, ectx)
     }
 
     pub fn update(&mut self, ctx: &mut Context) {
-        let next_scene = {
-            let current_scene = &mut **self.scenes.last_mut().expect("Tried to update empty scene stack.");
+        let change = {
+            let current_scene = self.scenes.last_mut().expect("Tried to update empty scene stack.");
             current_scene.update(&mut self.world, ctx)
         };
-        self.switch(next_scene);
+        match change {
+            SceneSwitch::None => {}
+            SceneSwitch::Push(s) => self.push(s),
+            SceneSwitch::Pop => {
+                let _ = self.pop();
+            }
+            SceneSwitch::Replace(s) => {
+                let _ = self.pop();
+                self.push(s);
+            }
+        };
     }
 
-    pub fn input(&mut self, ctx: &mut Context, input: SceneInput) {
-        let current_scene = &mut **self.scenes.last_mut().expect("Tried to do input for empty scene stack");
-        current_scene.input(&mut self.world, ctx, input);
+    pub fn event(&mut self, ctx: &mut Context, event: Event) {
+        let current_scene = self.scenes.last_mut().expect("Tried to do input for empty scene stack");
+        current_scene.event(&mut self.world, ctx, event);
     }
 }
 
+// This is what you have to implement for a new scene.
 pub trait Scene {
     fn update(&mut self, world: &mut GameWorld, ctx: &mut Context) -> SceneSwitch;
-    fn draw(&mut self, world: &mut GameWorld, ctx: &mut Context) -> GameResult<()>;
-    fn input(&mut self, world: &mut GameWorld, ctx: &mut Context, input: SceneInput);
+    fn draw(&mut self, world: &mut GameWorld, ctx: &mut Context, ectx: &mut CtxRef) -> tetra::Result;
+    fn event(&mut self, world: &mut GameWorld, ctx: &mut Context, event: Event);
     fn draw_previous(&self) -> bool {
         false
     }
 }
 
+// The result of calling scene.update()
 pub enum SceneSwitch {
     None,
-    Push(Box<dyn Scene>),
-    Replace(Box<dyn Scene>),
+    Push(Scenes),
+    Replace(Scenes),
     Pop,
 }
 
-pub enum SceneInput {
-    KeyDown(KeyCode, KeyMods, bool),
-    KeyUp(KeyCode, KeyMods),
+// This is a little boilerplate to avoid dynamic dispatch.
+pub enum Scenes {
+    Menu(MenuScene),
+}
+
+// Failing to add a new scene here will result in a compilation error.
+impl Scene for Scenes {
+    fn update(&mut self, world: &mut GameWorld, ctx: &mut Context) -> SceneSwitch {
+        match self {
+            Scenes::Menu(s) => s.update(world, ctx),
+        }
+    }
+
+    fn draw(&mut self, world: &mut GameWorld, ctx: &mut Context, ectx: &mut CtxRef) -> tetra::Result {
+        match self {
+            Scenes::Menu(s) => s.draw(world, ctx, ectx),
+        }
+    }
+
+    fn event(&mut self, world: &mut GameWorld, ctx: &mut Context, event: Event) {
+        match self {
+            Scenes::Menu(s) => s.event(world, ctx, event),
+        }
+    }
 }

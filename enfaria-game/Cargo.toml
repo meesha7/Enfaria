@@ -5,7 +5,7 @@ authors = ["Elinvynia <59487684+Elinvynia@users.noreply.github.com>"]
 edition = "2018"
 
 [dependencies]
-ggez = "0.6.0-rc1"
+tetra = "0.6"
 hecs = "0.3"
 egui = "0.9"
 enfaria-common = { path = "../enfaria-common" }
@@ -17,3 +17,8 @@ dotenv = "0.15"
 # Logging
 log = "0.4"
 env_logger = "0.8"
+
+
+[features]
+default = []
+static = ["tetra/sdl2_static_link"]
