@@ -1,149 +1,105 @@
 use egui::paint::ClippedShape;
-use egui::{ClippedMesh, CtxRef, Event, Modifiers, Output, Pos2, RawInput};
+use egui::{ClippedMesh, CtxRef, Event, Modifiers, Pos2, RawInput};
 use egui::{PointerButton, Texture as ETexture, Vec2 as EVec2};
 use tetra::graphics::mesh::{IndexBuffer, Vertex, VertexBuffer, VertexWinding};
 use tetra::graphics::{Color, DrawParams, Texture};
 use tetra::input::*;
 use tetra::math::Vec2;
-use tetra::Context;
+use tetra::{Context, Event as TEvent};
 
-pub fn prepare_ui(ctx: &mut Context, ectx: &mut CtxRef) {
-    let raw_input = gather_input(ctx);
-    ectx.begin_frame(raw_input);
-}
-
-pub fn end_ui_frame(ectx: &mut CtxRef) -> (Output, Vec<ClippedShape>) {
-    ectx.end_frame()
-}
-
+// Paint the frame.
 pub fn render_ui(ctx: &mut Context, ectx: &mut CtxRef, shapes: Vec<ClippedShape>) {
     let texture = ectx.texture();
     let clipped_meshes = ectx.tessellate(shapes);
     paint(ctx, clipped_meshes, texture.as_ref());
 }
 
-pub fn gather_input(ctx: &mut Context) -> RawInput {
-    let mut ri = RawInput::default();
-
-    let mouse_wheel = {
-        let v = get_mouse_wheel_movement(ctx);
-        EVec2 {
-            x: v[0] as f32,
-            y: v[1] as f32,
-        }
-    };
-    ri.scroll_delta = mouse_wheel;
-
-    let mouse_pos: Pos2 = get_mouse_position(ctx).into_array().into();
-    ri.events.push(Event::PointerMoved(mouse_pos));
-
+// Process tetra Events into egui Events
+pub fn handle_event(ctx: &mut Context, ri: &mut RawInput, event: &TEvent) {
+    let pos = Pos2::new(get_mouse_x(ctx), get_mouse_y(ctx));
     let mut modifiers = Modifiers::default();
-    if is_key_down(ctx, Key::LeftCtrl) || is_key_down(ctx, Key::RightCtrl) {
+
+    if is_key_modifier_down(ctx, KeyModifier::Ctrl) {
         modifiers.ctrl = true;
         modifiers.command = true;
-    };
-    if is_key_down(ctx, Key::LeftShift) || is_key_down(ctx, Key::RightShift) {
+    }
+
+    if is_key_modifier_down(ctx, KeyModifier::Shift) {
         modifiers.shift = true;
-    };
-    if is_key_down(ctx, Key::LeftAlt) || is_key_down(ctx, Key::RightAlt) {
+    }
+
+    if is_key_modifier_down(ctx, KeyModifier::Alt) {
         modifiers.alt = true;
-    };
-
-    if modifiers.ctrl && is_key_down(ctx, Key::C) {
-        ri.events.push(Event::Copy)
     }
 
-    if modifiers.ctrl && is_key_down(ctx, Key::X) {
-        ri.events.push(Event::Cut)
+    match event {
+        TEvent::MouseButtonPressed { button } => {
+            let ebutton = match button {
+                MouseButton::Left => PointerButton::Primary,
+                MouseButton::Right => PointerButton::Secondary,
+                MouseButton::Middle => PointerButton::Middle,
+                _ => PointerButton::Primary,
+            };
+
+            ri.events.push(Event::PointerButton {
+                pos,
+                button: ebutton,
+                pressed: true,
+                modifiers,
+            })
+        }
+        TEvent::MouseButtonReleased { button } => {
+            let ebutton = match button {
+                MouseButton::Left => PointerButton::Primary,
+                MouseButton::Right => PointerButton::Secondary,
+                MouseButton::Middle => PointerButton::Middle,
+                _ => PointerButton::Primary,
+            };
+
+            ri.events.push(Event::PointerButton {
+                pos,
+                button: ebutton,
+                pressed: false,
+                modifiers,
+            })
+        }
+        TEvent::KeyPressed { key } => {
+            if let Some(k) = convert_key(key) {
+                ri.events.push(Event::Key {
+                    key: k,
+                    pressed: true,
+                    modifiers,
+                })
+            }
+        }
+        TEvent::KeyReleased { key } => {
+            if let Some(k) = convert_key(key) {
+                ri.events.push(Event::Key {
+                    key: k,
+                    pressed: false,
+                    modifiers,
+                })
+            }
+        }
+        TEvent::MouseMoved { position, .. } => {
+            let p = Pos2::new(position.x, position.y);
+            ri.events.push(Event::PointerMoved(p));
+        }
+        TEvent::MouseWheelMoved { amount } => {
+            let am = EVec2 {
+                x: amount.x as f32,
+                y: amount.y as f32,
+            };
+            ri.scroll_delta = am;
+        }
+        TEvent::TextInput { text } => ri.events.push(Event::Text(text.to_owned())),
+        TEvent::FocusLost => ri.events.push(Event::PointerGone),
+        _ => {}
     }
-
-    ri.modifiers = modifiers;
-
-    if is_mouse_button_down(ctx, MouseButton::Left) {
-        ri.events.push(Event::PointerButton {
-            pos: mouse_pos,
-            button: PointerButton::Primary,
-            pressed: true,
-            modifiers,
-        })
-    }
-
-    if is_mouse_button_down(ctx, MouseButton::Right) {
-        ri.events.push(Event::PointerButton {
-            pos: mouse_pos,
-            button: PointerButton::Secondary,
-            pressed: true,
-            modifiers,
-        })
-    }
-
-    if is_mouse_button_down(ctx, MouseButton::Middle) {
-        ri.events.push(Event::PointerButton {
-            pos: mouse_pos,
-            button: PointerButton::Middle,
-            pressed: true,
-            modifiers,
-        })
-    }
-
-    if is_mouse_button_up(ctx, MouseButton::Left) {
-        ri.events.push(Event::PointerButton {
-            pos: mouse_pos,
-            button: PointerButton::Primary,
-            pressed: false,
-            modifiers,
-        })
-    }
-
-    if is_mouse_button_up(ctx, MouseButton::Right) {
-        ri.events.push(Event::PointerButton {
-            pos: mouse_pos,
-            button: PointerButton::Secondary,
-            pressed: false,
-            modifiers,
-        })
-    }
-
-    if is_mouse_button_up(ctx, MouseButton::Middle) {
-        ri.events.push(Event::PointerButton {
-            pos: mouse_pos,
-            button: PointerButton::Middle,
-            pressed: false,
-            modifiers,
-        })
-    }
-
-    for key in get_keys_pressed(ctx) {
-        let key = match convert_key(key) {
-            Some(k) => k,
-            None => continue,
-        };
-        ri.events.push(Event::Key {
-            key,
-            pressed: true,
-            modifiers,
-        });
-    }
-
-    for key in get_keys_released(ctx) {
-        let key = match convert_key(key) {
-            Some(k) => k,
-            None => continue,
-        };
-        ri.events.push(Event::Key {
-            key,
-            pressed: false,
-            modifiers,
-        });
-    }
-
-    if let Some(i) = get_text_input(ctx) {
-        ri.events.push(Event::Text(i.to_owned()))
-    }
-
-    ri
 }
 
+// Paint the GUI using tetra.
+// TODO: Optimize.
 pub fn paint(ctx: &mut Context, meshes: Vec<ClippedMesh>, texture: &ETexture) {
     for cm in meshes.into_iter() {
         let mut verts = vec![];
@@ -179,6 +135,7 @@ pub fn paint(ctx: &mut Context, meshes: Vec<ClippedMesh>, texture: &ETexture) {
         mesh.set_index_buffer(index);
         // This should most likely stay disabled.
         mesh.set_backface_culling(false);
+        // This may change in the future (egui doesn't guarantee it). If something looks broken, look here first.
         mesh.set_front_face_winding(VertexWinding::Clockwise);
         mesh.set_texture(tex);
         mesh.draw(ctx, DrawParams::default());

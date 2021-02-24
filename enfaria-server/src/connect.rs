@@ -6,7 +6,7 @@ use parking_lot::RwLock;
 use sqlx::mysql::MySqlPool;
 use std::sync::Arc;
 
-pub fn accept_connections(server: Arc<RwLock<ServerData>>, listener: TcpListener, pool: Arc<MySqlPool>) {
+pub fn accept_connections(server: Arc<RwLock<Server>>, listener: TcpListener, pool: Arc<MySqlPool>) {
     block_on(async move {
         loop {
             // Listen for connections
@@ -18,11 +18,19 @@ pub fn accept_connections(server: Arc<RwLock<ServerData>>, listener: TcpListener
                 }
             };
 
+            match stream.set_nodelay(true) {
+                Ok(_) => {}
+                Err(e) => {
+                    info!("Failed to set stream as no-delay: {:?}", e);
+                    continue;
+                }
+            }
+
             let mut buf = vec![0u8; 1024];
             match stream.read(&mut buf).await {
                 Ok(_) => {}
                 Err(e) => {
-                    info!("Failed to receive incoming packet {:?}", e);
+                    info!("Failed to receive incoming packet: {:?}", e);
                     continue;
                 }
             };
@@ -37,8 +45,12 @@ pub fn accept_connections(server: Arc<RwLock<ServerData>>, listener: TcpListener
 
             match add_user(stream, ip, packet, pool.as_ref()).await {
                 Some(user) => {
-                    info!("Added user {:?}", &user);
                     let mut s = server.write();
+                    if s.user_by_username(&user.username).is_some() {
+                        info!("User named {:?} already exists!", &user.username);
+                        continue;
+                    }
+                    info!("Added user named: {:?}", &user.username);
                     s.users.push(user)
                 }
                 None => continue,
@@ -67,9 +79,5 @@ pub async fn add_user(stream: TcpStream, ip: SocketAddr, packet: Packet, pool: &
         }
     };
 
-    let mut lock = USER_ID.lock();
-    let id = *lock;
-    *lock += 1;
-
-    Some(User::new(UserId(id), ip, stream, record.username, packet.session_id))
+    Some(User::new(ip, stream, record.username, packet.session_id))
 }

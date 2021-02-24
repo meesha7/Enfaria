@@ -8,7 +8,10 @@ edition = "2018"
 tetra = "0.6"
 hecs = "0.3"
 egui = "0.9"
+ureq = "2.0"
 enfaria-common = { path = "../enfaria-common" }
+crossbeam-channel = "0.5"
+bincode = "1.3"
 
 # Config
 config = "0.10"

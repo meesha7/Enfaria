@@ -1,8 +1,5 @@
+use crate::components::Sync;
 use hecs::*;
-
-// Marker struct that an entity should be synced between the client and the server.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct Sync;
 
 // Mode that dictates what defaults get loaded into the state.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
