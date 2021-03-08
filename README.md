@@ -1,23 +1,15 @@
 # Enfaria
 
-Enfaria is a work-in-progress multiplayer game inspired by Stardew Valley. It is currently in a very early phase of development and as such, any information put here would quickly become obsolete.
+Enfaria is a work-in-progress singleplayer game inspired by Stardew Valley. It is currently in a very early phase of development and as such, any information put here would quickly become obsolete.
 
-### Running the project
+For the old multiplayer version, switch to branch `multiplayer`.
 
-Run `scripts/release.sh`.
+## Dependencies
 
-Run `release/web/enfaria-web(.exe)`
+You need the SDL2.0 development libraries installed, follow the instructions [here](https://github.com/Rust-SDL2/rust-sdl2#sdl20-development-libraries).
 
-Run `release/server/enfaria-server(.exe)`
-
-Finally, run the game! (`release/enfaria-game(.exe)`)
+To statically link SDL2, you can use the `static` feature of this project.
 
 ## Contributing
 
 All contributions are welcome, a dedicated Discord will be made as soon as there are more people willing to contribute!
-
-### DB
-
-You need a MariaDB/MySQL database.
-
-Set it up by running `scripts/database.sh`.

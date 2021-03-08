@@ -1,0 +1,13 @@
+Map (
+    tile_width: 32,
+    tile_height: 32,
+    tiles: [
+        [ Tile(kind: Blocker), Tile(kind: Blocker), Tile(kind: Blocker), Tile(kind: Blocker), Tile(kind: Blocker), Tile(kind: Blocker), Tile(kind: Blocker)],
+        [ Tile(kind: Blocker), Tile(kind: Grass),   Tile(kind: Grass),   Tile(kind: Grass),   Tile(kind: Grass),   Tile(kind: Grass),   Tile(kind: Blocker)],
+        [ Tile(kind: Blocker), Tile(kind: Grass),   Tile(kind: Grass),   Tile(kind: Grass),   Tile(kind: Grass),   Tile(kind: Grass),   Tile(kind: Blocker)],
+        [ Tile(kind: Blocker), Tile(kind: Grass),   Tile(kind: Grass),   Tile(kind: Grass),   Tile(kind: Grass),   Tile(kind: Grass),   Tile(kind: Blocker)],
+        [ Tile(kind: Blocker), Tile(kind: Grass),   Tile(kind: Grass),   Tile(kind: Grass),   Tile(kind: Grass),   Tile(kind: Grass),   Tile(kind: Blocker)],
+        [ Tile(kind: Blocker), Tile(kind: Grass),   Tile(kind: Grass),   Tile(kind: Grass),   Tile(kind: Grass),   Tile(kind: Grass),   Tile(kind: Blocker)],
+        [ Tile(kind: Blocker), Tile(kind: Blocker), Tile(kind: Blocker), Tile(kind: Blocker), Tile(kind: Blocker), Tile(kind: Blocker), Tile(kind: Blocker)]
+    ],
+)

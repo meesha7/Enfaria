@@ -1,8 +1,1 @@
-# Rust
-*target/
-*/Cargo.lock
-
-# Ours
-enfaria-test/*
-enfaria-server/data/*
-release/*
+target/
