@@ -21,11 +21,15 @@ impl MenuScene {
 impl Scene for MenuScene {
     fn update(&mut self, world: &mut GameWorld, ctx: &mut Context) -> tetra::Result<SceneSwitch> {
         if self.play_clicked {
+            self.play_clicked = false;
+
             let scene = GameScene::new(world, ctx);
             return Ok(SceneSwitch::Push(Scenes::Game(scene)));
         };
 
         if self.options_clicked {
+            self.options_clicked = false;
+
             let scene = OptionsScene::new(world, ctx);
             return Ok(SceneSwitch::Push(Scenes::Options(scene)));
         };
