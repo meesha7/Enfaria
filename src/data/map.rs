@@ -30,3 +30,17 @@ impl Map {
         None
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::get_assets_folder;
+    use std::fs::read_to_string;
+
+    #[test]
+    fn deserialize_map() {
+        let assets_folder = get_assets_folder();
+        let file_contents = read_to_string(format!("{}/map.ron", assets_folder)).expect("Failed to read map file.");
+        let _: Map = ron::from_str(&file_contents).expect("Failed to deserialize map.");
+    }
+}
