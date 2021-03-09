@@ -1,4 +1,5 @@
 use crate::scenes::{GameScene, OptionsScene, Scene, SceneSwitch, Scenes};
+use crate::utils::center;
 use crate::world::GameWorld;
 use egui::*;
 use log::info;
@@ -37,18 +38,18 @@ impl Scene for MenuScene {
     }
 
     fn draw(&mut self, _world: &mut GameWorld, ctx: &mut Context, ectx: &mut CtxRef) -> tetra::Result {
-        let size = tetra::window::get_size(ctx);
+        let rect = center(ctx, vec2(150.0, 150.0));
+
         Window::new("Enfaria")
             .title_bar(true)
             .collapsible(false)
             .resizable(false)
-            .fixed_pos([(size.0 / 2 - 100) as f32, (size.1 / 2 - 100) as f32])
-            .fixed_size([200.0, 200.0])
+            .fixed_rect(rect)
             .show(ectx, |ui| {
                 ui.vertical_centered_justified(|ui| {
                     let play = ui.add(Button::new("Play"));
                     if play.clicked() {
-                        info!("Clicked play");
+                        info!("Play clicked");
                         self.play_clicked = true;
                     };
 

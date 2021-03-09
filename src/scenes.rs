@@ -8,6 +8,8 @@ mod menu;
 pub use menu::MenuScene;
 mod options;
 pub use options::OptionsScene;
+mod pause;
+pub use pause::PauseScene;
 
 // Holds the stack of scenes and takes care of actual logic.
 pub struct SceneStack {
@@ -98,10 +100,12 @@ pub enum SceneSwitch {
 }
 
 // This is a little boilerplate to avoid dynamic dispatch.
+#[derive(Debug)]
 pub enum Scenes {
     Menu(MenuScene),
     Game(GameScene),
     Options(OptionsScene),
+    Pause(PauseScene),
 }
 
 // Failing to add a new scene here will result in a compilation error.
@@ -111,6 +115,7 @@ impl Scene for Scenes {
             Scenes::Menu(s) => s.update(world, ctx),
             Scenes::Game(s) => s.update(world, ctx),
             Scenes::Options(s) => s.update(world, ctx),
+            Scenes::Pause(s) => s.update(world, ctx),
         }
     }
 
@@ -119,6 +124,7 @@ impl Scene for Scenes {
             Scenes::Menu(s) => s.draw(world, ctx, ectx),
             Scenes::Game(s) => s.draw(world, ctx, ectx),
             Scenes::Options(s) => s.draw(world, ctx, ectx),
+            Scenes::Pause(s) => s.draw(world, ctx, ectx),
         }
     }
 
@@ -127,6 +133,16 @@ impl Scene for Scenes {
             Scenes::Menu(s) => s.event(world, ctx, event),
             Scenes::Game(s) => s.event(world, ctx, event),
             Scenes::Options(s) => s.event(world, ctx, event),
+            Scenes::Pause(s) => s.event(world, ctx, event),
+        }
+    }
+
+    fn draw_previous(&self) -> bool {
+        match self {
+            Scenes::Menu(s) => s.draw_previous(),
+            Scenes::Game(s) => s.draw_previous(),
+            Scenes::Options(s) => s.draw_previous(),
+            Scenes::Pause(s) => s.draw_previous(),
         }
     }
 }

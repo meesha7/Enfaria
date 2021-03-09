@@ -8,6 +8,7 @@ mod input;
 mod scenes;
 mod state;
 mod systems;
+mod utils;
 mod world;
 
 pub fn get_assets_folder() -> String {

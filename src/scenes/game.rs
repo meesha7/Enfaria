@@ -2,18 +2,21 @@ use crate::components::{Player, Position, Texture};
 use crate::data::Map;
 use crate::get_assets_folder;
 use crate::input::key_to_dir;
-use crate::scenes::{Scene, SceneSwitch};
+use crate::scenes::{PauseScene, Scene, SceneSwitch, Scenes};
 use crate::systems::{hover_system, movement_system, render_system};
+use crate::utils::position;
 use crate::world::GameWorld;
-use egui::CtxRef;
+use egui::{pos2, vec2, CtxRef, Frame, Window};
 use hecs::EntityBuilder;
 use std::fs::read_to_string;
 use tetra::input::*;
+use tetra::window::{get_height, get_width};
 use tetra::{Context, Event};
 
 #[derive(Debug)]
 pub struct GameScene {
     pub map: Map,
+    pub pause: bool,
 }
 
 impl GameScene {
@@ -58,27 +61,60 @@ impl GameScene {
             },
         ));
 
-        GameScene { map }
+        GameScene { map, pause: false }
     }
 }
 
 impl Scene for GameScene {
     fn update(&mut self, world: &mut GameWorld, ctx: &mut Context) -> tetra::Result<SceneSwitch> {
+        if self.pause {
+            self.pause = false;
+            let scene = Scenes::Pause(PauseScene::new(world, ctx));
+            return Ok(SceneSwitch::Push(scene));
+        }
+
         for key in get_keys_down(ctx) {
             if let Some(md) = key_to_dir(key) {
                 movement_system(world, &self.map, md)
             }
         }
+
         Ok(SceneSwitch::None)
     }
 
     fn draw(&mut self, world: &mut GameWorld, ctx: &mut Context, ectx: &mut CtxRef) -> tetra::Result {
         render_system(ctx, world);
         hover_system(ctx, ectx, world);
+
+        let mut frame = Frame::window(ectx.style().as_ref());
+        frame.shadow.extrusion = 0.0;
+
+        let center_width = (get_width(ctx) / 2) as f32;
+        let height = get_height(ctx);
+
+        let rect = position(pos2(center_width, (height - height / 6) as f32), vec2(150.0, 50.0));
+
+        Window::new("hotbar")
+            .resize(|r| r.with_stroke(true))
+            .title_bar(false)
+            .resizable(false)
+            .collapsible(false)
+            .frame(frame)
+            .fixed_rect(rect)
+            .show(ectx, |ui| {
+                ui.label("Test");
+            });
+
         Ok(())
     }
 
-    fn event(&mut self, _world: &mut GameWorld, _ctx: &mut Context, _event: Event) -> tetra::Result {
+    fn event(&mut self, _world: &mut GameWorld, _ctx: &mut Context, event: Event) -> tetra::Result {
+        if let Event::KeyPressed { key } = event {
+            if key == Key::Escape {
+                self.pause = true;
+            }
+        }
+
         Ok(())
     }
 }
