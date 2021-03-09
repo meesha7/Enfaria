@@ -4,9 +4,24 @@ use egui::*;
 use log::info;
 use tetra::{Context, Event};
 
+#[derive(Debug, PartialEq)]
+enum Resolution {
+    Res1080,
+    Res768,
+    Res600,
+}
+
 #[derive(Debug, Default)]
 pub struct OptionsScene {
     back_clicked: bool,
+    resolution_selected: Resolution,
+    fullscreen: bool
+}
+
+impl Default for Resolution {
+    fn default() -> Self {
+        Resolution::Res1080
+    }
 }
 
 impl OptionsScene {
@@ -34,6 +49,15 @@ impl Scene for OptionsScene {
             .resizable(false)
             .fixed_rect(rect)
             .show(ectx, |ui| {
+                // TODO: Label is on the right side of the combobox, we want it on the left
+                egui::combo_box_with_label(ui, "Resolution:", format!("{:?}", self.resolution_selected), |ui| {
+                    ui.selectable_value(&mut self.resolution_selected, Resolution::Res1080, "1920x1080");
+                    ui.selectable_value(&mut self.resolution_selected, Resolution::Res768, "1024x768");
+                    ui.selectable_value(&mut self.resolution_selected, Resolution::Res600, "800x600");
+                });
+
+                ui.checkbox(&mut self.fullscreen, "Fullscreen");
+
                 ui.vertical_centered_justified(|ui| {
                     let back = ui.add(Button::new("Back"));
 
